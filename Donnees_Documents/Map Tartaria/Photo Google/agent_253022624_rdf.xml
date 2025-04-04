@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+   xmlns:owl="http://www.w3.org/2002/07/owl#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+   xmlns:rico="https://www.ica.org/standards/RiC/ontology#"
+>
+  <rdf:Description rdf:about="https://francearchives.gouv.fr/externaluri/d3ntb7xgvv-17sbqf1hi4qgj">
+    <rico:placeIsSourceOfPlaceRelation rdf:nodeID="Neac0d8f959194eca9c4207159fcece71"/>
+    <rico:isOrWasLocationOf rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#Place"/>
+    <rico:location>Hauts-de-Seine (Ile-de-France , département)</rico:location>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N722594287ef14c0ea8b4697c65c8fde5">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#PlaceRelation"/>
+    <rico:placeRelationHasSource rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb7o8hq-1b5fuvt2evll9"/>
+    <rico:placeRelationHasTarget rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rico:type>Eure</rico:type>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://francearchives.gouv.fr/agent/253022624">
+    <rico:name>Le Parisien libéré (Paris ; 1944-1986)</rico:name>
+    <rdfs:label>Le Parisien libéré (Paris ; 1944-1986)</rdfs:label>
+    <owl:sameAs rdf:resource="https://data.bnf.fr/ark:/12148/cb328331715"/>
+    <owl:sameAs rdf:resource="https://catalogue.bnf.fr/ark:/12148/cb11877849c"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#Agent"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#CorporateBody"/>
+    <rico:beginningDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1944-08-22</rico:beginningDate>
+    <rico:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1986-01-25</rico:endDate>
+    <rico:isOrWasDescribedBy rdf:resource="https://francearchives.gouv.fr/authorityrecord/FRAN_NP_052460"/>
+    <rico:agentIsTargetOfPerformanceRelation rdf:nodeID="N6e7e6b63b63f490ca00ce209012ba99d"/>
+    <rico:agentIsTargetOfPerformanceRelation rdf:nodeID="N9b2a646a16a14a75a1929eda9655cd23"/>
+    <rico:performsOrPerformed rdf:nodeID="N19eb94097b5d4880b932537899ca1b0a"/>
+    <rico:performsOrPerformed rdf:nodeID="Nd95ca34bedea4456ac19d0aa5b2cdb43"/>
+    <rico:thingIsTargetOfTypeRelation rdf:nodeID="Nf785f243c3314f71a23f29964594918e"/>
+    <rico:hasOrHadLegalStatus rdf:resource="https://francearchives.gouv.fr/externaluri/d5blonav6b-7jwfyyjh3efl"/>
+    <rico:thingIsTargetOfPlaceRelation rdf:nodeID="N722594287ef14c0ea8b4697c65c8fde5"/>
+    <rico:thingIsTargetOfPlaceRelation rdf:nodeID="Neac0d8f959194eca9c4207159fcece71"/>
+    <rico:thingIsTargetOfPlaceRelation rdf:nodeID="N544f52f0af6143338f5bc81ca844ff7e"/>
+    <rico:thingIsTargetOfPlaceRelation rdf:nodeID="N387a374b335b4133a95f7566e922c10f"/>
+    <rico:thingIsTargetOfPlaceRelation rdf:nodeID="N50b1cd812ffc4a1d83233214ad5deb4a"/>
+    <rico:thingIsTargetOfPlaceRelation rdf:nodeID="N3a45ae9e060c47fca6cd4967e701bbfe"/>
+    <rico:thingIsTargetOfPlaceRelation rdf:nodeID="Nad9ddd208af5491891cc3bca87f311b1"/>
+    <rico:hasOrHadLocation rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb7o8hq-1b5fuvt2evll9"/>
+    <rico:hasOrHadLocation rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb7xgvv-17sbqf1hi4qgj"/>
+    <rico:hasOrHadLocation rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb8gs2c-r7m1xcm91zhq"/>
+    <rico:hasOrHadLocation rdf:resource="https://francearchives.gouv.fr/externaluri/d3nyv8j47y--q19vvxm7arwm"/>
+    <rico:hasOrHadLocation rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb8t74v--1wxzypxi8r7lm"/>
+    <rico:hasOrHadLocation rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb8yzd6-1a3vkw5xig8h2"/>
+    <rico:hasOrHadLocation rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb918mq--w6r60hxod5vb"/>
+    <rico:hasOrHadAgentName rdf:nodeID="Nf7c8c7f15f8a4394ad1addd8a4c0bcd1"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N19eb94097b5d4880b932537899ca1b0a">
+    <rico:activityIsSourceOfPerformanceRelation rdf:nodeID="N6e7e6b63b63f490ca00ce209012ba99d"/>
+    <rico:isOrWasPerformedBy rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rico:hasActivityType rdf:resource="https://francearchives.gouv.fr/externaluri/d3nyuhqgah-1dgirf2dmzbkz"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#Activity"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N9b2a646a16a14a75a1929eda9655cd23">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#PerformanceRelation"/>
+    <rico:performanceRelationHasSource rdf:nodeID="Nd95ca34bedea4456ac19d0aa5b2cdb43"/>
+    <rico:performanceRelationHasTarget rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="Nad9ddd208af5491891cc3bca87f311b1">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#PlaceRelation"/>
+    <rico:placeRelationHasSource rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb918mq--w6r60hxod5vb"/>
+    <rico:placeRelationHasTarget rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rico:type>Yonne</rico:type>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://francearchives.gouv.fr/externaluri/d5blonav6b-7jwfyyjh3efl">
+    <rico:typeIsSourceOfTypeRelation rdf:nodeID="Nf785f243c3314f71a23f29964594918e"/>
+    <rico:isOrWasLegalStatusOf rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#LegalStatus"/>
+    <rdfs:label>société commerciale</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://francearchives.gouv.fr/externaluri/d3ntb8gs2c-r7m1xcm91zhq">
+    <rico:placeIsSourceOfPlaceRelation rdf:nodeID="N544f52f0af6143338f5bc81ca844ff7e"/>
+    <rico:isOrWasLocationOf rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#Place"/>
+    <rico:location>Oise (Picardie , département)</rico:location>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N544f52f0af6143338f5bc81ca844ff7e">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#PlaceRelation"/>
+    <rico:placeRelationHasSource rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb8gs2c-r7m1xcm91zhq"/>
+    <rico:placeRelationHasTarget rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rico:type>Oise</rico:type>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N3a45ae9e060c47fca6cd4967e701bbfe">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#PlaceRelation"/>
+    <rico:placeRelationHasSource rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb8yzd6-1a3vkw5xig8h2"/>
+    <rico:placeRelationHasTarget rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rico:type>Val-de-Marne</rico:type>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://francearchives.gouv.fr/externaluri/d3ntb7o8hq-1b5fuvt2evll9">
+    <rico:placeIsSourceOfPlaceRelation rdf:nodeID="N722594287ef14c0ea8b4697c65c8fde5"/>
+    <rico:isOrWasLocationOf rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#Place"/>
+    <rico:location>Eure (Haute-Normandie , département)</rico:location>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://francearchives.gouv.fr/externaluri/d3ntb8t74v--1wxzypxi8r7lm">
+    <rico:placeIsSourceOfPlaceRelation rdf:nodeID="N50b1cd812ffc4a1d83233214ad5deb4a"/>
+    <rico:isOrWasLocationOf rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#Place"/>
+    <rico:location>Seine-Saint-Denis (Ile-de-France , département)</rico:location>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N6e7e6b63b63f490ca00ce209012ba99d">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#PerformanceRelation"/>
+    <rico:performanceRelationHasSource rdf:nodeID="N19eb94097b5d4880b932537899ca1b0a"/>
+    <rico:performanceRelationHasTarget rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://francearchives.gouv.fr/externaluri/d3ntb918mq--w6r60hxod5vb">
+    <rico:placeIsSourceOfPlaceRelation rdf:nodeID="Nad9ddd208af5491891cc3bca87f311b1"/>
+    <rico:isOrWasLocationOf rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#Place"/>
+    <rico:location>Yonne (Bourgogne , département)</rico:location>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="Neac0d8f959194eca9c4207159fcece71">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#PlaceRelation"/>
+    <rico:placeRelationHasSource rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb7xgvv-17sbqf1hi4qgj"/>
+    <rico:placeRelationHasTarget rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rico:type>Hauts-de-Seine</rico:type>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://francearchives.gouv.fr/externaluri/d3nyv8j47y--q19vvxm7arwm">
+    <rico:placeIsSourceOfPlaceRelation rdf:nodeID="N387a374b335b4133a95f7566e922c10f"/>
+    <rico:isOrWasLocationOf rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#Place"/>
+    <rico:location>10e arrondissement</rico:location>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="Nd95ca34bedea4456ac19d0aa5b2cdb43">
+    <rico:activityIsSourceOfPerformanceRelation rdf:nodeID="N9b2a646a16a14a75a1929eda9655cd23"/>
+    <rico:isOrWasPerformedBy rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rico:hasActivityType rdf:resource="https://francearchives.gouv.fr/externaluri/d-25ub5bepd--1a98b90ydj2ye"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#Activity"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N50b1cd812ffc4a1d83233214ad5deb4a">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#PlaceRelation"/>
+    <rico:placeRelationHasSource rdf:resource="https://francearchives.gouv.fr/externaluri/d3ntb8t74v--1wxzypxi8r7lm"/>
+    <rico:placeRelationHasTarget rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rico:type>Seine-Saint-Denis</rico:type>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="Nf785f243c3314f71a23f29964594918e">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#TypeRelation"/>
+    <rico:typeRelationHasSource rdf:resource="https://francearchives.gouv.fr/externaluri/d5blonav6b-7jwfyyjh3efl"/>
+    <rico:typeRelationHasTarget rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="Nf7c8c7f15f8a4394ad1addd8a4c0bcd1">
+    <rico:isOrWasAgentNameOf rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#AgentName"/>
+    <rico:textualValue>Le Parisien libéré (Paris ; 1944-1986)</rico:textualValue>
+    <rico:type>authorized</rico:type>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://francearchives.gouv.fr/externaluri/d-25ub5bepd--1a98b90ydj2ye">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#ActivityType"/>
+    <rdfs:label>édition</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://francearchives.gouv.fr/externaluri/d3ntb8yzd6-1a3vkw5xig8h2">
+    <rico:placeIsSourceOfPlaceRelation rdf:nodeID="N3a45ae9e060c47fca6cd4967e701bbfe"/>
+    <rico:isOrWasLocationOf rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#Place"/>
+    <rico:location>Val-de-Marne (Ile-de-France , département)</rico:location>
+  </rdf:Description>
+  <rdf:Description rdf:about="https://francearchives.gouv.fr/externaluri/d3nyuhqgah-1dgirf2dmzbkz">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#ActivityType"/>
+    <rdfs:label>exploitation commerciale</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="N387a374b335b4133a95f7566e922c10f">
+    <rdf:type rdf:resource="https://www.ica.org/standards/RiC/ontology#PlaceRelation"/>
+    <rico:placeRelationHasSource rdf:resource="https://francearchives.gouv.fr/externaluri/d3nyv8j47y--q19vvxm7arwm"/>
+    <rico:placeRelationHasTarget rdf:resource="https://francearchives.gouv.fr/agent/253022624"/>
+    <rico:type>Paris 10e</rico:type>
+  </rdf:Description>
+</rdf:RDF>

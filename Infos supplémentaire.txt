@@ -1,0 +1,197 @@
+
+
+# Archives
+
+{
+
+    # Archives du journal Le Monde depuis 1944 le 19 Décembre
+
+    "https://www.lemonde.fr/archives-du-monde/19-12-1944/"
+
+    
+
+
+    #   Archives le Journal "Le Parisien"
+    {
+    "https://francearchives.gouv.fr/fr/authorityrecord/FRAN_NP_052460"
+
+
+    # Archives - 2000 "Le Parisien"
+    "https://www.leparisien.fr/archives/2000/"
+
+    # 31 Mars 2000 première archive 
+    "https://www.leparisien.fr/archives/2000/31-03-2000/"
+
+    # Journaux qui ont paru dans les années 1900
+    "https://presselocaleancienne.bnf.fr/html/annees-1900"
+
+    # Journaux qui ont paru sous l'Ancien Régime
+    "https://presselocaleancienne.bnf.fr/html/ancien-regime"
+
+    # Journaux qui ont paru pendant la Révolution
+    "https://presselocaleancienne.bnf.fr/html/revolution"
+
+
+    # https://presselocaleancienne.bnf.fr/html/annees-1800
+    "Journaux qui ont paru dans les années 1800"
+
+
+
+    }
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+# (à vérifier) Sois-disant civilisation avancé éteintes
+{
+
+# Civilisation Hyperborée
+
+
+
+# Civilisation de la Vallée de l'Indus (Date ' -3300 à 1300 AV JC ')
+
+# Civilisation des Hittites (Date ' -1600 à 1178 AV JC ')
+
+# Civilisation des Etrusques (Date ' -900 à -27 AV JC ')
+
+# Civilisation de Caral (Date ' -2600 à -200 AV JC ')
+
+# Civilisation des Nuragiques (Date ' -1800 à 800 AV JC ')
+
+
+
+
+
+# 8 civilisations qui ont mystérieusement disparu "https://www.futura-sciences.com/sciences/questions-reponses/histoire-8-civilisations-ont-mysterieusement-disparu-15696/"
+
+
+{
+
+# Les Rapa Nui
+""
+
+
+
+# La civilisation minoenne
+""
+
+
+# Les Anasazis
+""
+
+
+# Les Khmers
+""
+
+
+# Les Assyriens
+""
+
+
+# Les Mayas
+""
+
+
+
+# Les Clovis
+""
+
+
+}
+
+
+#
+
+{
+
+    # L'Empire Mongol
+
+
+    # L'Empire d'Alexandre Le GRAND
+
+    # L' Empire Romain
+
+    # L' Empire Grecque
+
+    # L'empire Egyptien
+
+
+    # L'Empire Afriquain
+
+    # L'Empire Khmers
+
+
+
+
+
+
+}
+
+
+
+
+
+
+# Recherche Google "civilisations avancées éteintes" "https://www.google.com/search?client=opera&q=civilisations+avancés+éeintes&sourceid=opera&ie=UTF-8&oe=UTF-8"
+
+{
+
+
+
+
+
+}
+
+
+# Recherche Google "Les civilisations éteintes" "https://www.google.com/search?client=opera&hs=Sqb&sca_esv=f1914c9e852d54b9&q=Les+civilisations+éteintes&spell=1&sa=X&ved=2ahUKEwigzZ_7rr2MAxU0RqQEHR37KhUQBSgAegQICxAB&biw=1866&bih=888&dpr=1"
+
+{
+
+}
+
+
+
+
+
+
+
+
+
+
+#
+"https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwigzZ_7rr2MAxU0RqQEHR37KhUQFnoECBcQAQ&url=https%3A%2F%2Fwww.futura-sciences.com%2Fsciences%2Fquestions-reponses%2Fhistoire-8-civilisations-ont-mysterieusement-disparu-15696%2F&usg=AOvVaw2Ga-QsxJ314WooQNOx7VIH&opi=89978449"
+
+}
+
+
+
+
+
+
+# Les 7 Merveilles du Mondes
+
+[
+
+    # 
+    "https://www.google.com/search?client=opera&q=Les+7+merveilles+du+mondes&sourceid=opera&ie=UTF-8&oe=UTF-8"
+
+    # Sept Merveilles du monde (FR)
+    "https://fr.wikipedia.org/wiki/Sept_Merveilles_du_monde#:~:text=Ces%20sept%20œuvres%20sont%20%3A%20les,et%20le%20phare%20d%27Alexandrie."
+
+    # Seven Wonders of the Ancient World (EN)
+    "https://en.wikipedia.org/wiki/Seven_Wonders_of_the_Ancient_World"
+
+]
