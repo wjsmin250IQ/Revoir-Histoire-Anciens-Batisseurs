@@ -1,0 +1,18 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+
+VOLUME ["/app/data"]
+CMD ["python", "scripts/analyze.py"]
+
+# Ajouter ces lignes
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    tesseract-ocr-fra \
+    libgl1
+
+COPY Donnees_Documents/Map\ Tartaria/Photo\ Google/ data/maps/raw_images/historical/

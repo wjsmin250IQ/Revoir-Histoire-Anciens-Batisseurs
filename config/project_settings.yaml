@@ -1,0 +1,26 @@
+# config/project_settings.yaml
+project:
+  name: "Revoir Histoire Anciens Batisseurs"
+  version: "2.0"
+  data_sources:
+    - type: "youtube"
+      path: "data/sources/youtube.json"
+      update_frequency: "weekly"
+    - type: "maps"
+      path: "data/maps"
+      update_frequency: "manual"
+
+processing:
+  image_analysis:
+    enabled: true
+    tools: ["opencv", "tesseract"]
+  text_analysis:
+    languages: ["fr", "en"]
+    nlp_models: ["spacy_fr_core_news_md"]
+
+api:
+  youtube:
+    enabled: true
+    quota: 10000
+  map_tile:
+    provider: "mapbox"

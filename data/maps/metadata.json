@@ -1,0 +1,25 @@
+{
+    "collection": {
+      "name": "Tartaria Maps Archive",
+      "version": "2.0",
+      "origin": "Donnees_Documents/Map Tartaria/Photo Google"
+    },
+    "maps": [
+      {
+        "id": "MAP_001",
+        "original_filename": "1754_Tartaria_map.jpg",
+        "new_location": "raw_images/historical/1754_Tartaria_map.jpg",
+        "metadata": {
+          "year": 1754,
+          "creator": "Unknown",
+          "source": "Internet Archive",
+          "resolution": "8000x6000",
+          "georeference_status": "pending"
+        },
+        "analysis": {
+          "tags": ["Tartaria", "18th century", "historical"],
+          "ai_generated_description": "Carte montrant l'étendue présumée de la Tartarie en Asie centrale"
+        }
+      }
+    ]
+  }

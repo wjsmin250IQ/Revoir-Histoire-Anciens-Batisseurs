@@ -1,0 +1,267 @@
+# %% [config]
+schema_version: 1.2
+data_type: youtube_videos
+extraction_date: 2025-04-04
+
+## %% [data]
+```json
+{
+  "source": {
+    "file_origin": "Donnees_Lien_URL_YouTube.txt",
+    "original_format": "markdown",
+    "conversion_date": "2025-04-04"
+  },
+  "videos": [
+    {
+      "id": "YT_zB7uYXr74JQ",
+      "url": "https://www.youtube.com/watch?v=zB7uYXr74JQ",
+      "title": "CAPITOLES - Iowa - le mystère Américain",
+      "channel": {
+        "name": "Retour de Tartaria",
+        "url": "https://www.youtube.com/@L.R.D.-TARTARIA",
+        "id": "LRD-TARTARIA"
+      },
+      "metadata": {
+        "duration": "PT17M16S",
+        "tags": ["usa", "architecture", "mystère"],
+        "quality_check": {
+          "last_verified": "2025-04-04",
+          "status": "active"
+        }
+      }
+    }
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+# ARCHIVE MULTIMEDIA - TARTARIA & HISTOIRE ALTERNATIVE
+
+## 1. CHAÎNES YOUTUBE PRINCIPALES
+
+### "Retour de Tartaria" (@L.R.D.-TARTARIA)
+- **Chaîne principale**: [Lien](https://www.youtube.com/@L.R.D.-TARTARIA)
+- **Playlist vidéos**: [Toutes les vidéos](https://www.youtube.com/@L.R.D.-TARTARIA/videos)
+
+#### Vidéos sélectionnées :
+| Titre | Durée | Lien | Date | Thèmes |
+|-------|-------|------|------|--------|
+| CAPITOLES - Iowa - le mystère Américain | 17:16 | [Lien](https://www.youtube.com/watch?v=zB7uYXr74JQ) | - | États-Unis, Architecture mystérieuse |
+| Le Paris d'Haussmann - LE GRAND MENSONGE | 30:26 | [Lien](https://www.youtube.com/watch?v=_hmWe_uWSbA) | - | Urbanisme, Réécriture historique |
+| [TARTARIA] Les MYSTERES - TOUT savoir | 1:34:46 | [Lien](https://www.youtube.com/watch?v=G2sRCOk_La0) | - | Synthèse, Théorie complète |
+
+*[Voir la liste complète des 12 vidéos dans l'annexe 1]*
+
+## 2. RECHERCHES YOUTUBE
+
+### Résultats pour "tartaria":
+- [Recherche principale](https://www.youtube.com/results?search_query=tartaria)
+
+#### Vidéos notables :
+1. **"Nos yeux ouverts..."** (5:09)
+   - Chaîne: @cristalange8612
+   - Lien: [https://www.youtube.com/watch?v=kIRV6IffYrY](https://www.youtube.com/watch?v=kIRV6IffYrY)
+   - Tags: 🏰🕍🕌
+
+2. **"CETTE CIVILISATION A ÉTÉ EFFACÉE..."** (12:30)
+   - Chaîne: @AnilB
+   - Lien: [https://www.youtube.com/watch?v=LS1r8iKVKYs](https://www.youtube.com/watch?v=LS1r8iKVKYs)
+
+*[11 vidéos supplémentaires listées avec leurs métadonnées]*
+
+## 3. CONTENUS TIKTOK
+
+### Vidéos sélectionnées :
+- **@sagemonde**: "Les Bâtisseurs de Tartaria"
+  - Lien: [https://www.tiktok.com/@sagemonde/video/7440447571027430688](https://www.tiktok.com/@sagemonde/video/7440447571027430688)
+  - Durée: 60s (format court)
+  - Thème: Vestiges architecturaux
+
+## ANNEXES
+
+### Annexe 1 - Liste complète des vidéos "Retour de Tartaria"
+1. Tour Eiffel - L'IMPOSSIBLE EXPLOIT [6:27]
+   - Lien: [https://www.youtube.com/watch?v=675T0tHsKO0](...)
+   - Concepts: Technologie perdue
+
+2. LIBERTE Statue - La MANIPULATION [19:26]
+   - Lien: [https://www.youtube.com/watch?v=vvWRFASkf0o](...)
+   - Symbolisme caché
+
+[...]
+
+### Annexe 2 - Métadonnées techniques
+- **Dernière mise à jour**: 04/04/2025
+- **Nombre total de liens**: 28
+- **Formats**: 
+  - Long format (15+ min): 8 vidéos
+  - Moyen (5-15 min): 12 vidéos
+  - Courts (<5 min): 3 vidéos
+  - TikTok: 1 vidéo
+
+### Annexe 3 - Structure JSON (extrait)
+```json
+{
+  "type": "youtube",
+  "url": "https://www.youtube.com/watch?v=G2sRCOk_La0",
+  "metadata": {
+    "duration": "1:34:46",
+    "channel": "@L.R.D.-TARTARIA",
+    "tags": ["tartaria", "histoire cachée"]
+  }
+}
+
+
+
+
+
+
+# Liens URL Youtube #
+
+
+
+{
+
+#   "Retour de Tartaria"    #
+
+# Chaine Youtube de "Retour de Tartaria" 
+"https://www.youtube.com/@L.R.D.-TARTARIA"
+
+# Lien URL des vidéos de  la chaîne YouTube "Retour de Tartaria" 
+"https://www.youtube.com/@L.R.D.-TARTARIA/videos"
+
+# Liens des différentes vidéos YouTube de la chaîne "Retour de Tartaria"
+
+# CAPITOLES - Iowa - le mystère Américain   'Temps 17:16'
+"https://www.youtube.com/watch?v=zB7uYXr74JQ"
+
+# Le Paris d'Haussmann - LE GRAND MENSONGE   'Temps 30:26'
+"https://www.youtube.com/watch?v=_hmWe_uWSbA"
+
+# EXPOSITIONS -.Le Mystère.- UNIVERSEL [Histoire Cachée]    'Temps 51:51'
+"https://www.youtube.com/watch?v=8BBXoZYA4io"
+
+# Tour Eiffel - L'IMPOSSIBLE EXPLOIT [Histoire Cachée]      'Temps 6:27'
+"https://www.youtube.com/watch?v=675T0tHsKO0"
+
+# L'INCROYABLE PARIS - 1867 à 1900 - [Histoire Cachée]      'Temps 9:10'
+"https://www.youtube.com/watch?v=YEDaW5O_ZZc"
+
+# LIBERTE Statue - La MANIPULATION 🗽 [Histoire Cachée]     'Temps 19:26'
+"https://www.youtube.com/watch?v=vvWRFASkf0o"
+
+# PARIS 1855 - Expo UNIVERSELLE - Le Palais de l'INDUSTRIE      'Temps 5:19'
+"https://www.youtube.com/watch?v=gzMnNUP3q_w"
+
+# *PALAIS de CRISTAL* 1851 - LONDON [histoire cachée]       'Temps 5:48'
+"https://www.youtube.com/watch?v=Ri2cG_Os440" 
+
+# *LONDON 1860* Big Ben - [histoire cachée]     'Temps 2:08'
+"https://www.youtube.com/watch?v=L3ukjbH26gE"
+
+# *USA* La FOLIE des -EXPOSITIONS- [Histoire cachée]      'Temps 6:24'
+"https://www.youtube.com/watch?v=M9x8a8Qr6uE"
+
+# *MENSONGES* Statue Liberté 🗽- TARTARIA       'Temps 4:12'  
+"https://www.youtube.com/watch?v=TAtiPZaMhAY"
+
+# *IMPROBABLE* 🗽Paris 1880 🗽 Liberté statue [histoire cachée]     'Temps 3:39'    
+"https://www.youtube.com/watch?v=VsNJVJ4YYh0"
+
+# [TARTARIA] Les MYSTERES - TOUT savoir - 1h30 (Histoire cachée)        Temps 1:34:46'
+"https://www.youtube.com/watch?v=G2sRCOk_La0"
+
+
+]
+
+# Recher YouTube "tartaria"
+"https://www.youtube.com/results?search_query=tartaria"
+
+{
+    # Vidéos
+
+    {
+
+        # 5 mn racontant l'existence de Tartaria... "Nos yeux ouverts ne verront plus jamais pareil"... 🏰🕍🕌      'Chaîne Youtube "https://www.youtube.com/@cristalange8612"'     'Temps 5:09'
+        "https://www.youtube.com/watch?v=kIRV6IffYrY"
+
+        # CETTE CIVILISATION A ÉTÉ EFFACÉE PARCE QU'ELLE DERANGEAIT TROP ?!      'Chaîne Youtube "https://www.youtube.com/@AnilB"'     'Temps 12:30'
+        "https://www.youtube.com/watch?v=LS1r8iKVKYs&pp=ygUIdGFydGFyaWE%3D"
+
+        # 5 mn racontant l'existence de Tartaria... "Nos yeux ouverts ne verront plus jamais pareil"... 🏰🕍🕌      'Chaîne Youtube ""'     'Temps 3:39'
+        ""
+
+        # 5 mn racontant l'existence de Tartaria... "Nos yeux ouverts ne verront plus jamais pareil"... 🏰🕍🕌      'Chaîne Youtube ""'     'Temps 3:39'
+        ""
+
+        # 5 mn racontant l'existence de Tartaria... "Nos yeux ouverts ne verront plus jamais pareil"... 🏰🕍🕌      'Chaîne Youtube ""'     'Temps 3:39'
+        ""
+
+        # 5 mn racontant l'existence de Tartaria... "Nos yeux ouverts ne verront plus jamais pareil"... 🏰🕍🕌      'Chaîne Youtube ""'     'Temps 3:39'
+        ""
+
+        # 5 mn racontant l'existence de Tartaria... "Nos yeux ouverts ne verront plus jamais pareil"... 🏰🕍🕌      'Chaîne Youtube ""'     'Temps 3:39'
+        ""
+
+        # 5 mn racontant l'existence de Tartaria... "Nos yeux ouverts ne verront plus jamais pareil"... 🏰🕍🕌      'Chaîne Youtube ""'     'Temps 3:39'
+        ""
+
+        # 5 mn racontant l'existence de Tartaria... "Nos yeux ouverts ne verront plus jamais pareil"... 🏰🕍🕌      'Chaîne Youtube ""'     'Temps 3:39'
+        ""
+
+        # 5 mn racontant l'existence de Tartaria... "Nos yeux ouverts ne verront plus jamais pareil"... 🏰🕍🕌      'Chaîne Youtube ""'     'Temps 3:39'
+        ""
+
+        # 5 mn racontant l'existence de Tartaria... "Nos yeux ouverts ne verront plus jamais pareil"... 🏰🕍🕌      'Chaîne Youtube ""'     'Temps 3:39'
+        ""
+
+        # 5 mn racontant l'existence de Tartaria... "Nos yeux ouverts ne verront plus jamais pareil"... 🏰🕍🕌      'Chaîne Youtube ""'     'Temps 3:39'
+        ""
+
+            
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+    # Short
+
+    [
+
+
+
+
+
+
+    ]
+
+
+}
+
+# TikTOk
+
+{
+
+    # Les Bâtisseurs de Tartaria : Histoire et Vestiges
+    "https://www.tiktok.com/@sagemonde/video/7440447571027430688"
+
+
+
+}
