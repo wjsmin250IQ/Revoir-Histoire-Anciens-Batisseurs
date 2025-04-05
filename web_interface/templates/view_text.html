@@ -1,14 +1,680 @@
 {% extends "base.html" %}
 
-{% block title %}Visualisation - {{ filename }}{% endblock %}
+{% block title %}{{ filename }} - Visualisation HB{% endblock %}
+
+{% block extra_css %}
+<style>
+    .text-viewer-container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 2rem;
+    }
+    .text-header {
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .text-content-card {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+    .text-content-wrapper {
+        position: relative;
+    }
+    .text-content {
+        font-family: 'Courier New', monospace;
+        white-space: pre-wrap;
+        line-height: 1.6;
+        padding: 1.5rem;
+        background-color: #f5f5f5;
+        border-radius: 6px;
+        max-height: 70vh;
+        overflow-y: auto;
+        tab-size: 4;
+    }
+    .text-toolbar {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: white;
+        border-radius: 50px;
+        padding: 5px 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        z-index: 10;
+        display: flex;
+        gap: 5px;
+    }
+    .text-toolbar button {
+        background: transparent;
+        border: none;
+        color: #555;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .text-toolbar button:hover {
+        background: #f0f0f0;
+        color: #2c3e50;
+    }
+    .metadata-panel {
+        background-color: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .line-numbers {
+        position: absolute;
+        left: 0;
+        top: 0;
+        padding: 1.5rem 0.5rem;
+        background-color: #e9ecef;
+        color: #6c757d;
+        text-align: right;
+        font-family: 'Courier New', monospace;
+        user-select: none;
+        border-right: 1px solid #dee2e6;
+    }
+    .highlight {
+        background-color: rgba(255, 255, 0, 0.3);
+    }
+    .search-box {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        background: white;
+        border-radius: 50px;
+        padding: 5px 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .nav-tabs .nav-link.active {
+        font-weight: bold;
+        border-bottom: 3px solid #2c3e50;
+    }
+    .tab-content {
+        padding: 1.5rem 0;
+    }
+    .syntax-highlight .keyword {
+        color: #d2691e;
+        font-weight: bold;
+    }
+    .syntax-highlight .string {
+        color: #28a745;
+    }
+    .syntax-highlight .number {
+        color: #17a2b8;
+    }
+    .syntax-highlight .comment {
+        color: #6c757d;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>{{ filename }}</h1>
-    <div class="card mt-4">
-        <div class="card-body">
-            <pre><code>{{ content }}</code></pre>
+<div class="container-fluid py-4">
+    <div class="text-viewer-container">
+        <!-- En-tête avec informations -->
+        <div class="text-header">
+            <div class="d-flex justify-content-between align-items-start flex-wrap">
+                <div>
+                    <h1>
+                        <i class="fas fa-file-alt me-2"></i>
+                        {{ filename }}
+                    </h1>
+                    <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
+                        <span class="badge bg-secondary">Texte</span>
+                        <span class="badge bg-info text-dark">{{ file_extension|upper }}</span>
+                        <span class="badge bg-light text-dark">{{ file_size }}</span>
+                        <span class="text-muted"><i class="far fa-clock me-1"></i> {{ last_modified }}</span>
+                        <span class="badge bg-light text-dark">
+                            <i class="fas fa-ruler-combined me-1"></i>
+                            <span id="lineCount">0</span> lignes
+                        </span>
+                    </div>
+                </div>
+                <div class="btn-group mt-2 mt-md-0">
+                    <a href="/{{ file_path }}" download class="btn btn-primary">
+                        <i class="fas fa-download me-1"></i> Télécharger
+                    </a>
+                    <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#shareModal">
+                        <i class="fas fa-share-alt me-1"></i> Partager
+                    </button>
+                    {% if current_user.is_authenticated %}
+                    <button class="btn btn-outline-info" id="editBtn">
+                        <i class="fas fa-edit me-1"></i> Modifier
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglets de navigation -->
+        <ul class="nav nav-tabs" id="textTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="view-tab" data-bs-toggle="tab" data-bs-target="#view" type="button" role="tab">
+                    <i class="fas fa-eye me-1"></i> Visualisation
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata" type="button" role="tab">
+                    <i class="fas fa-info-circle me-1"></i> Métadonnées
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button" role="tab">
+                    <i class="fas fa-chart-bar me-1"></i> Analyse
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="textTabsContent">
+            <!-- Onglet Visualisation -->
+            <div class="tab-pane fade show active" id="view" role="tabpanel">
+                <div class="card text-content-card">
+                    <div class="card-body p-0">
+                        <div class="text-content-wrapper">
+                            <div class="search-box">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control form-control-sm" id="searchInput" placeholder="Rechercher...">
+                                    <button class="btn btn-outline-secondary" id="searchPrev">
+                                        <i class="fas fa-chevron-up"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" id="searchNext">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-toolbar">
+                                <button id="wrapToggle" title="Retour à la ligne">
+                                    <i class="fas fa-text-width"></i>
+                                </button>
+                                <button id="themeToggle" title="Thème sombre/clair">
+                                    <i class="fas fa-moon"></i>
+                                </button>
+                                <button id="copyBtn" title="Copier le texte">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button id="fullscreenBtn" title="Plein écran">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                            <div class="line-numbers" id="lineNumbers"></div>
+                            <pre class="text-content mb-0" id="textContent">{{ content }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Métadonnées -->
+            <div class="tab-pane fade" id="metadata" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="metadata-panel mb-4">
+                            <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Informations de base</h5>
+                            <dl class="row">
+                                <dt class="col-sm-4">Nom du fichier</dt>
+                                <dd class="col-sm-8">{{ filename }}</dd>
+
+                                <dt class="col-sm-4">Type</dt>
+                                <dd class="col-sm-8">{{ file_extension|upper }}</dd>
+
+                                <dt class="col-sm-4">Encodage</dt>
+                                <dd class="col-sm-8" id="fileEncoding">UTF-8</dd>
+
+                                <dt class="col-sm-4">Taille</dt>
+                                <dd class="col-sm-8">{{ file_size }}</dd>
+
+                                <dt class="col-sm-4">Dernière modification</dt>
+                                <dd class="col-sm-8">{{ last_modified }}</dd>
+
+                                <dt class="col-sm-4">Emplacement</dt>
+                                <dd class="col-sm-8">{{ file_path }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="metadata-panel">
+                            <h5 class="mb-3"><i class="fas fa-file-signature me-2"></i>Signature du fichier</h5>
+                            <div class="alert alert-light">
+                                <small>
+                                    <code id="fileHash">Calcul en cours...</code>
+                                </small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Vérifier l'intégrité</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="hashInput" placeholder="Coller une signature de référence">
+                                    <button class="btn btn-outline-secondary" id="verifyHash">
+                                        Vérifier
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Analyse -->
+            <div class="tab-pane fade" id="analysis" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="metadata-panel mb-4">
+                            <h5 class="mb-3"><i class="fas fa-ruler-combined me-2"></i>Statistiques</h5>
+                            <dl class="row">
+                                <dt class="col-sm-6">Nombre de lignes</dt>
+                                <dd class="col-sm-6" id="statLines">0</dd>
+
+                                <dt class="col-sm-6">Nombre de mots</dt>
+                                <dd class="col-sm-6" id="statWords">0</dd>
+
+                                <dt class="col-sm-6">Nombre de caractères</dt>
+                                <dd class="col-sm-6" id="statChars">0</dd>
+
+                                <dt class="col-sm-6">Caractères (sans espaces)</dt>
+                                <dd class="col-sm-6" id="statCharsNoSpace">0</dd>
+
+                                <dt class="col-sm-6">Ligne la plus longue</dt>
+                                <dd class="col-sm-6" id="statLongestLine">0 caractères</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="metadata-panel">
+                            <h5 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Répartition</h5>
+                            <div class="mb-3">
+                                <h6>Types de caractères</h6>
+                                <div class="progress mb-2" style="height: 10px;">
+                                    <div class="progress-bar bg-success" id="alphaBar" style="width: 0%"></div>
+                                    <div class="progress-bar bg-info" id="digitBar" style="width: 0%"></div>
+                                    <div class="progress-bar bg-warning" id="spaceBar" style="width: 0%"></div>
+                                    <div class="progress-bar bg-danger" id="otherBar" style="width: 0%"></div>
+                                </div>
+                                <div class="d-flex flex-wrap">
+                                    <div class="me-3"><span class="badge bg-success me-1">A-Z</span> <span id="alphaCount">0</span></div>
+                                    <div class="me-3"><span class="badge bg-info me-1">0-9</span> <span id="digitCount">0</span></div>
+                                    <div class="me-3"><span class="badge bg-warning me-1">Espaces</span> <span id="spaceCount">0</span></div>
+                                    <div><span class="badge bg-danger me-1">Autres</span> <span id="otherCount">0</span></div>
+                                </div>
+                            </div>
+                            <div>
+                                <h6>Mots les plus fréquents</h6>
+                                <div id="wordCloud" style="height: 150px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Modal Partage -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-share-alt me-2"></i>Partager ce fichier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="shareLink" class="form-label">Lien de partage</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="shareLink" value="{{ url_for('view_text', file_path=file_path, _external=True) }}" readonly>
+                        <button class="btn btn-outline-secondary" id="copyLink">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Partager via</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fab fa-twitter me-1"></i> Twitter
+                        </button>
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fab fa-facebook me-1"></i> Facebook
+                        </button>
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fas fa-envelope me-1"></i> Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Édition -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Éditer le fichier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <textarea class="form-control font-monospace" id="editContent" rows="20" style="white-space: pre; overflow-x: auto;">{{ content }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/wordcloud@1.1.2/src/wordcloud2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Variables globales
+        let currentTheme = 'light';
+        let wrapLines = false;
+        let searchResults = [];
+        let currentSearchIndex = -1;
+        
+        // Initialisation
+        updateLineNumbers();
+        calculateStats();
+        calculateHash();
+        
+        // Basculer le thème
+        $('#themeToggle').on('click', function() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            updateTheme();
+        });
+        
+        // Basculer le retour à la ligne
+        $('#wrapToggle').on('click', function() {
+            wrapLines = !wrapLines;
+            $('#textContent').css('white-space', wrapLines ? 'pre-wrap' : 'pre');
+            $(this).toggleClass('active', wrapLines);
+        });
+        
+        // Copier le texte
+        $('#copyBtn').on('click', function() {
+            const textContent = document.getElementById('textContent');
+            const range = document.createRange();
+            range.selectNode(textContent);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            
+            // Feedback visuel
+            const originalText = $(this).html();
+            $(this).html('<i class="fas fa-check"></i>');
+            setTimeout(() => {
+                $(this).html('<i class="fas fa-copy"></i>');
+            }, 2000);
+        });
+        
+        // Plein écran
+        $('#fullscreenBtn').on('click', function() {
+            $('#textContent').toggleClass('fullscreen');
+            $('.text-content-wrapper').toggleClass('fullscreen-wrapper');
+            $(this).html($(this).html().includes('compress') ? 
+                '<i class="fas fa-expand"></i>' : '<i class="fas fa-compress"></i>');
+        });
+        
+        // Recherche de texte
+        $('#searchInput').on('input', function() {
+            searchText($(this).val());
+        });
+        
+        $('#searchNext').on('click', function() {
+            navigateSearch(1);
+        });
+        
+        $('#searchPrev').on('click', function() {
+            navigateSearch(-1);
+        });
+        
+        // Édition du fichier
+        $('#editBtn').on('click', function() {
+            $('#editModal').modal('show');
+        });
+        
+        $('#editForm').on('submit', function(e) {
+            e.preventDefault();
+            const newContent = $('#editContent').val();
+            $('#textContent').text(newContent);
+            updateLineNumbers();
+            calculateStats();
+            calculateHash();
+            $('#editModal').modal('hide');
+        });
+        
+        // Vérification de hash
+        $('#verifyHash').on('click', function() {
+            const referenceHash = $('#hashInput').val().trim();
+            const currentHash = $('#fileHash').text().trim();
+            
+            if (referenceHash === currentHash) {
+                alert('La signature correspond ! Le fichier est intact.');
+            } else if (referenceHash) {
+                alert('Les signatures ne correspondent pas. Le fichier a peut-être été modifié.');
+            }
+        });
+        
+        // Fonctions utilitaires
+        function updateTheme() {
+            if (currentTheme === 'dark') {
+                $('.text-content').css({
+                    'background-color': '#2c3e50',
+                    'color': '#f8f9fa'
+                });
+                $('.line-numbers').css({
+                    'background-color': '#1a252f',
+                    'color': '#adb5bd'
+                });
+                $('#themeToggle').html('<i class="fas fa-sun"></i>');
+            } else {
+                $('.text-content').css({
+                    'background-color': '#f5f5f5',
+                    'color': '#212529'
+                });
+                $('.line-numbers').css({
+                    'background-color': '#e9ecef',
+                    'color': '#6c757d'
+                });
+                $('#themeToggle').html('<i class="fas fa-moon"></i>');
+            }
+        }
+        
+        function updateLineNumbers() {
+            const text = $('#textContent').text();
+            const lines = text.split('\n');
+            let lineNumbersHtml = '';
+            
+            for (let i = 0; i < lines.length; i++) {
+                lineNumbersHtml += (i + 1) + '<br>';
+            }
+            
+            $('#lineNumbers').html(lineNumbersHtml);
+            $('#lineCount').text(lines.length);
+        }
+        
+        function calculateStats() {
+            const text = $('#textContent').text();
+            const lines = text.split('\n');
+            const words = text.match(/\S+/g) || [];
+            const chars = text.length;
+            const charsNoSpace = text.replace(/\s/g, '').length;
+            
+            // Compter les types de caractères
+            const alpha = (text.match(/[a-zA-Z]/g) || []).length;
+            const digit = (text.match(/[0-9]/g) || []).length;
+            const space = (text.match(/\s/g) || []).length;
+            const other = chars - alpha - digit - space;
+            
+            // Trouver la ligne la plus longue
+            let longestLine = 0;
+            lines.forEach(line => {
+                if (line.length > longestLine) longestLine = line.length;
+            });
+            
+            // Mettre à jour l'interface
+            $('#statLines').text(lines.length);
+            $('#statWords').text(words.length);
+            $('#statChars').text(chars);
+            $('#statCharsNoSpace').text(charsNoSpace);
+            $('#statLongestLine').text(longestLine + ' caractères');
+            
+            $('#alphaCount').text(alpha);
+            $('#digitCount').text(digit);
+            $('#spaceCount').text(space);
+            $('#otherCount').text(other);
+            
+            // Mettre à jour les barres de progression
+            const total = Math.max(1, alpha + digit + space + other);
+            $('#alphaBar').css('width', (alpha / total * 100) + '%');
+            $('#digitBar').css('width', (digit / total * 100) + '%');
+            $('#spaceBar').css('width', (space / total * 100) + '%');
+            $('#otherBar').css('width', (other / total * 100) + '%');
+            
+            // Générer le nuage de mots
+            generateWordCloud(words);
+        }
+        
+        function generateWordCloud(words) {
+            const wordCount = {};
+            words.forEach(word => {
+                const cleanWord = word.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+                if (cleanWord.length > 3) {
+                    wordCount[cleanWord] = (wordCount[cleanWord] || 0) + 1;
+                }
+            });
+            
+            const wordArray = Object.entries(wordCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 20)
+                .map(([text, size]) => ({ text, size }));
+            
+            WordCloud(document.getElementById('wordCloud'), { 
+                list: wordArray,
+                gridSize: 10,
+                weightFactor: 5,
+                fontFamily: 'Arial, sans-serif',
+                color: '#2c3e50',
+                backgroundColor: '#f8f9fa',
+                rotateRatio: 0
+            });
+        }
+        
+        function calculateHash() {
+            // Simulation de calcul de hash (en production, utiliser une vraie fonction de hash)
+            const text = $('#textContent').text();
+            setTimeout(() => {
+                const fakeHash = 'sha256-' + btoa(text.length + text.substr(0, 10)).substr(0, 32);
+                $('#fileHash').text(fakeHash);
+            }, 500);
+        }
+        
+        function searchText(query) {
+            // Réinitialiser la recherche
+            $('.highlight').removeClass('highlight');
+            searchResults = [];
+            currentSearchIndex = -1;
+            
+            if (!query) return;
+            
+            const text = $('#textContent').text();
+            const regex = new RegExp(escapeRegExp(query), 'gi');
+            let match;
+            
+            while ((match = regex.exec(text)) !== null) {
+                searchResults.push({
+                    start: match.index,
+                    end: match.index + match[0].length
+                });
+            }
+            
+            if (searchResults.length > 0) {
+                navigateSearch(1);
+            }
+        }
+        
+        function navigateSearch(direction) {
+            if (searchResults.length === 0) return;
+            
+            // Supprimer le surlignage actuel
+            $('.highlight').removeClass('highlight');
+            
+            // Mettre à jour l'index
+            currentSearchIndex = (currentSearchIndex + direction) % searchResults.length;
+            if (currentSearchIndex < 0) currentSearchIndex = searchResults.length - 1;
+            
+            // Obtenir la position actuelle
+            const { start, end } = searchResults[currentSearchIndex];
+            const textContent = $('#textContent')[0];
+            const text = textContent.textContent;
+            
+            // Créer un range et le surligner
+            const range = document.createRange();
+            range.setStart(textContent.firstChild, start);
+            range.setEnd(textContent.firstChild, end);
+            
+            const span = document.createElement('span');
+            span.className = 'highlight';
+            range.surroundContents(span);
+            
+            // Faire défiler jusqu'à la position
+            span.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Mettre en évidence temporairement
+            setTimeout(() => {
+                span.style.transition = 'all 0.3s';
+                span.style.backgroundColor = 'rgba(255, 255, 0, 0.5)';
+                setTimeout(() => {
+                    span.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
+                }, 300);
+            }, 100);
+        }
+        
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+        
+        // Syntax highlighting pour les fichiers de code
+        function applySyntaxHighlighting() {
+            const fileExt = '{{ file_extension|lower }}';
+            const code = $('#textContent').text();
+            
+            if (['py', 'js', 'html', 'css', 'json', 'xml'].includes(fileExt)) {
+                $('#textContent').addClass('syntax-highlight');
+                
+                // Simplifié - en production utiliser une librairie comme Prism.js
+                const highlighted = code
+                    .replace(/(\b(function|def|class|if|else|for|while|return|import|from|var|let|const)\b)/g, '<span class="keyword">$1</span>')
+                    .replace(/(".*?"|'.*?')/g, '<span class="string">$1</span>')
+                    .replace(/(\b\d+\b)/g, '<span class="number">$1</span>')
+                    .replace(/(#.*?$|\/\/.*?$|\/\*[\s\S]*?\*\/)/gm, '<span class="comment">$1</span>');
+                
+                $('#textContent').html(highlighted);
+            }
+        }
+        
+        // Appliquer le highlight si nécessaire
+        applySyntaxHighlighting();
+    });
+</script>
 {% endblock %}

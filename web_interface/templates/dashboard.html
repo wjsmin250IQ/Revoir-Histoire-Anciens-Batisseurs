@@ -1,66 +1,363 @@
 {% extends "base.html" %}
 
-{% block title %}Tableau de bord{% endblock %}
+{% block title %}Tableau de bord - Projet HB{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 5px solid #3498db;
+    }
+    .stat-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+        border-top: 3px solid #3498db;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .stat-card .card-body {
+        padding: 1.5rem;
+    }
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+    .stat-icon {
+        font-size: 2rem;
+        color: #3498db;
+        margin-bottom: 1rem;
+    }
+    .progress-lg {
+        height: 10px;
+    }
+    .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+        padding-left: 2rem;
+        border-left: 2px solid #e9ecef;
+    }
+    .timeline-item:last-child {
+        padding-bottom: 0;
+        border-left: 2px solid transparent;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -9px;
+        top: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #3498db;
+        border: 3px solid white;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    .quick-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 1rem;
+    }
+    .quick-action-btn {
+        flex: 1;
+        text-align: center;
+        padding: 0.5rem;
+        border-radius: 8px;
+        background: #f8f9fa;
+        transition: all 0.3s;
+    }
+    .quick-action-btn:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-8">
-        <h1>Tableau de bord</h1>
-        <p class="lead">Vue d'ensemble du projet</p>
+<div class="container-fluid py-4">
+    <!-- En-tête du dashboard -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1><i class="fas fa-tachometer-alt me-2"></i>Tableau de bord</h1>
+                <p class="lead mb-0">Vue d'ensemble du projet et statistiques clés</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary px-4" onclick="startAnalysis('full')">
+                    <i class="fas fa-play me-2"></i>Lancer l'analyse complète
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="col-md-4 text-end">
-        <button class="btn btn-primary" onclick="startAnalysis('full')">
-            Lancer l'analyse complète
-        </button>
-    </div>
-</div>
 
-<div class="row">
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Statistiques</h5>
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h6>Sources</h6>
-                        <p id="source-count">0</p>
+    <!-- Cartes de statistiques -->
+    <div class="row">
+        <!-- Carte Sources -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fas fa-database"></i>
                     </div>
-                    <div>
-                        <h6>Cartes</h6>
-                        <p id="map-count">0</p>
-                    </div>
-                    <div>
-                        <h6>Analyses</h6>
-                        <p id="analysis-count">0</p>
-                    </div>
+                    <h5 class="card-title text-muted mb-2">Sources</h5>
+                    <h2 class="stat-value mb-0" id="source-count">{{ stats.sources_count }}</h2>
+                    <p class="text-success small mt-2">
+                        <i class="fas fa-arrow-up me-1"></i>
+                        <span>12.5% depuis hier</span>
+                    </p>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-md-8 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Activité récente</h5>
-                <div class="timeline" id="recent-activity">
-                    <!-- Timeline items will be added dynamically -->
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Progression de l'analyse</h5>
-                <div class="progress mb-3">
-                    <div id="analysis-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+        <!-- Carte Cartes -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h5 class="card-title text-muted mb-2">Cartes</h5>
+                    <h2 class="stat-value mb-0" id="map-count">{{ stats.maps_count }}</h2>
+                    <p class="text-success small mt-2">
+                        <i class="fas fa-arrow-up me-1"></i>
+                        <span>8.3% depuis hier</span>
+                    </p>
                 </div>
-                <p id="analysis-status">En attente de démarrage...</p>
+            </div>
+        </div>
+
+        <!-- Carte Analyses -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5 class="card-title text-muted mb-2">Analyses</h5>
+                    <h2 class="stat-value mb-0" id="analysis-count">{{ stats.analysis_count }}</h2>
+                    <p class="text-danger small mt-2">
+                        <i class="fas fa-arrow-down me-1"></i>
+                        <span>3.2% en attente</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte Widgets -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="card-body">
+                    <div class="stat-icon">
+                        <i class="fas fa-puzzle-piece"></i>
+                    </div>
+                    <h5 class="card-title text-muted mb-2">Widgets</h5>
+                    <h2 class="stat-value mb-0" id="widgets-count">{{ stats.widgets_count }}</h2>
+                    <p class="text-success small mt-2">
+                        <i class="fas fa-arrow-up me-1"></i>
+                        <span>5.7% actifs</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deuxième ligne -->
+    <div class="row">
+        <!-- Activité récente -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Activité récente</h5>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="timeline" id="recent-activity">
+                        <!-- Exemple d'item de timeline -->
+                        <div class="timeline-item">
+                            <h6 class="mb-1">Nouvelle carte ajoutée</h6>
+                            <p class="text-muted small mb-1">1754_Tartaria_map.jpg</p>
+                            <p class="small text-muted mb-0">
+                                <i class="far fa-clock me-1"></i> Il y a 2 heures
+                            </p>
+                        </div>
+                        <div class="timeline-item">
+                            <h6 class="mb-1">Analyse complétée</h6>
+                            <p class="text-muted small mb-1">Comparaison architecturale</p>
+                            <p class="small text-muted mb-0">
+                                <i class="far fa-clock me-1"></i> Il y a 5 heures
+                            </p>
+                        </div>
+                        <div class="timeline-item">
+                            <h6 class="mb-1">Document importé</h6>
+                            <p class="text-muted small mb-1">archive_historique.pdf</p>
+                            <p class="small text-muted mb-0">
+                                <i class="far fa-clock me-1"></i> Aujourd'hui, 09:42
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progression et actions rapides -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Progression</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">Analyse en cours</h6>
+                    <div class="progress progress-lg mb-3">
+                        <div id="analysis-progress" class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p id="analysis-status" class="small text-muted mb-4">
+                        <i class="fas fa-info-circle me-1"></i> 
+                        Analyse des structures architecturales (45% complété)
+                    </p>
+
+                    <h6 class="mb-3">Actions rapides</h6>
+                    <div class="quick-actions">
+                        <a href="#" class="quick-action-btn" data-bs-toggle="tooltip" title="Nouvelle analyse">
+                            <i class="fas fa-plus text-primary"></i>
+                            <div class="small mt-1">Ajouter</div>
+                        </a>
+                        <a href="#" class="quick-action-btn" data-bs-toggle="tooltip" title="Exporter les données">
+                            <i class="fas fa-file-export text-success"></i>
+                            <div class="small mt-1">Exporter</div>
+                        </a>
+                        <a href="#" class="quick-action-btn" data-bs-toggle="tooltip" title="Paramètres">
+                            <i class="fas fa-cog text-info"></i>
+                            <div class="small mt-1">Réglages</div>
+                        </a>
+                        <a href="#" class="quick-action-btn" data-bs-toggle="tooltip" title="Aide">
+                            <i class="fas fa-question-circle text-warning"></i>
+                            <div class="small mt-1">Aide</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques et visualisations -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Statistiques des analyses</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                    id="chartDropdown" data-bs-toggle="dropdown">
+                                <i class="fas fa-calendar me-1"></i> 7 derniers jours
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">24 heures</a></li>
+                                <li><a class="dropdown-item" href="#">7 derniers jours</a></li>
+                                <li><a class="dropdown-item" href="#">30 derniers jours</a></li>
+                                <li><a class="dropdown-item" href="#">Tout afficher</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="analyticsChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js pour les graphiques -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Initialiser les tooltips
+    $(document).ready(function(){
+        $('[data-bs-toggle="tooltip"]').tooltip();
+        
+        // Animation pour les cartes de statistiques
+        $('.stat-card').hover(
+            function() {
+                $(this).find('.stat-icon').css('transform', 'scale(1.1)');
+            },
+            function() {
+                $(this).find('.stat-icon').css('transform', 'scale(1)');
+            }
+        );
+        
+        // Initialiser le graphique
+        const ctx = document.getElementById('analyticsChart').getContext('2d');
+        const analyticsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                datasets: [{
+                    label: 'Analyses complétées',
+                    data: [12, 19, 8, 15, 12, 6, 9],
+                    backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Nouvelles sources',
+                    data: [8, 12, 5, 9, 7, 3, 10],
+                    backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                    borderColor: 'rgba(46, 204, 113, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Simuler la progression de l'analyse
+        function simulateProgress() {
+            let progress = 45;
+            const progressBar = document.getElementById('analysis-progress');
+            const progressStatus = document.getElementById('analysis-status');
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 5;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    progressStatus.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i> Analyse terminée !';
+                }
+                progressBar.style.width = progress + '%';
+                progressBar.setAttribute('aria-valuenow', progress);
+                progressStatus.innerHTML = '<i class="fas fa-info-circle me-1"></i> Analyse des structures architecturales (' + Math.round(progress) + '% complété)';
+            }, 3000);
+        }
+        
+        // Démarrer la simulation après 2 secondes
+        setTimeout(simulateProgress, 2000);
+    });
+</script>
 {% endblock %}

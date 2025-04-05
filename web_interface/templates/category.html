@@ -1,34 +1,187 @@
 {% extends "base.html" %}
 
-{% block title %}Fichiers {{ category }}{% endblock %}
+{% block title %}Fichiers {{ category }} - Anciens Bâtisseurs{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .file-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .file-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .file-thumbnail {
+        height: 180px;
+        object-fit: cover;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+    }
+    .file-thumbnail i {
+        font-size: 3rem;
+    }
+    .file-type-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.7rem;
+    }
+    .file-actions {
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .file-card:hover .file-actions {
+        opacity: 1;
+    }
+    .empty-state {
+        padding: 4rem;
+        text-align: center;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-    <h1>Fichiers {{ category }}</h1>
-    <p class="text-muted">{{ files|length }} fichiers trouvés</p>
+<div class="category-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1><i class="fas fa-folder-open me-2"></i> {{ category }}</h1>
+            <p class="mb-0">{{ files|length }} fichiers trouvés</p>
+        </div>
+        <div>
+            <div class="dropdown">
+                <button class="btn btn-light dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                    <i class="fas fa-sort me-1"></i> Trier par
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="?sort=name">Nom (A-Z)</a></li>
+                    <li><a class="dropdown-item" href="?sort=-name">Nom (Z-A)</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="?sort=modified">Date (plus ancien)</a></li>
+                    <li><a class="dropdown-item" href="?sort=-modified">Date (plus récent)</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="?sort=size">Taille (croissant)</a></li>
+                    <li><a class="dropdown-item" href="?sort=-size">Taille (décroissant)</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="row">
+{% if files %}
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
     {% for file in files %}
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
+    <div class="col">
+        <div class="card h-100 file-card">
+            <div class="file-thumbnail">
+                {% if file.Type in ['jpg','png','webp'] %}
+                <img src="{{ url_for('static', filename='uploads/' ~ file.Path) }}" class="img-fluid w-100 h-100">
+                {% else %}
+                <i class="fas fa-{{ 
+                    'file-image' if file.Type in ['jpg','png','gif','webp'] else
+                    'file-pdf' if file.Type == 'pdf' else
+                    'file-word' if file.Type in ['doc','docx'] else
+                    'file-excel' if file.Type in ['xls','xlsx'] else
+                    'file-powerpoint' if file.Type in ['ppt','pptx'] else
+                    'file-code' if file.Type in ['html','css','js','py'] else
+                    'file-alt' if file.Type == 'txt' else
+                    'file-archive' if file.Type in ['zip','rar','7z'] else
+                    'file'
+                }} text-{{ 
+                    'danger' if file.Type in ['jpg','png','gif','webp'] else
+                    'primary' if file.Type in ['pdf','doc','docx','xls','xlsx','ppt','pptx'] else
+                    'success' if file.Type in ['html','css','js','py'] else
+                    'secondary'
+                }}"></i>
+                {% endif %}
+                <span class="badge bg-dark file-type-badge">{{ file.Type|upper }}</span>
+            </div>
             <div class="card-body">
-                <h5 class="card-title">
-                    <img src="{{ url_for('static', filename='icons/' ~ file.Type ~ '.png') }}" 
-                         onerror="this.src='{{ url_for('static', filename='icons/file.png') }}'" 
-                         class="file-icon">
-                    {{ file.Name }}
-                </h5>
+                <h5 class="card-title text-truncate">{{ file.Name }}</h5>
                 <p class="card-text">
-                    <small class="text-muted">{{ file.Type|upper }} • {{ file.Size }} • {{ file.Modified }}</small>
+                    <small class="text-muted">
+                        <i class="far fa-calendar-alt me-1"></i> {{ file.Modified }}<br>
+                        <i class="fas fa-weight-hanging me-1"></i> {{ file.Size }}
+                    </small>
                 </p>
             </div>
-            <div class="card-footer bg-transparent">
-                <a href="/view/{{ file.Path }}" class="btn btn-sm btn-outline-primary">Voir</a>
-                <a href="/download/{{ file.Path }}" class="btn btn-sm btn-outline-secondary">Télécharger</a>
+            <div class="card-footer bg-transparent border-0 file-actions">
+                <div class="d-flex justify-content-between">
+                    <a href="/view/{{ file.Path }}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Voir">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="/download/{{ file.Path }}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Télécharger">
+                        <i class="fas fa-download"></i>
+                    </a>
+                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Détails">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Supprimer">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
+
+<nav class="mt-5">
+    <ul class="pagination justify-content-center">
+        <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1">Précédent</a>
+        </li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item">
+            <a class="page-link" href="#">Suivant</a>
+        </li>
+    </ul>
+</nav>
+{% else %}
+<div class="empty-state">
+    <i class="far fa-folder-open fa-4x mb-3 text-muted"></i>
+    <h3>Aucun fichier trouvé</h3>
+    <p class="text-muted">Cette catégorie ne contient actuellement aucun fichier.</p>
+    <a href="/upload" class="btn btn-primary mt-3">
+        <i class="fas fa-upload me-1"></i> Ajouter un fichier
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Activer les tooltips
+    $(document).ready(function(){
+        $('[data-bs-toggle="tooltip"]').tooltip();
+        
+        // Animation pour les cartes
+        $('.file-card').hover(
+            function() {
+                $(this).find('.file-thumbnail img').css('transform', 'scale(1.05)');
+            },
+            function() {
+                $(this).find('.file-thumbnail img').css('transform', 'scale(1)');
+            }
+        );
+    });
+</script>
 {% endblock %}

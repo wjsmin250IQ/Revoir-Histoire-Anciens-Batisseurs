@@ -1,49 +1,380 @@
 {% extends "base.html" %}
 
-{% block title %}Cartes historiques{% endblock %}
+{% block title %}Cartes Historiques - Explorateur HB{% endblock %}
 
 {% block extra_css %}
 <style>
+    .map-header {
+        background: linear-gradient(135deg, rgba(44, 62, 80, 0.9) 0%, rgba(52, 152, 219, 0.9) 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        background-image: url('/static/images/map-bg.jpg');
+        background-blend-mode: overlay;
+        background-size: cover;
+        background-position: center;
+    }
     .map-card {
-        transition: transform 0.3s;
-        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        height: 100%;
     }
     .map-card:hover {
-        transform: scale(1.03);
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .map-card-img {
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+    .map-card:hover .map-card-img {
+        transform: scale(1.05);
+    }
+    .map-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.8rem;
+    }
+    .map-container {
+        height: 600px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .filter-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        height: 100%;
+    }
+    .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+        padding-left: 2rem;
+        border-left: 2px solid #e9ecef;
+    }
+    .timeline-item:last-child {
+        padding-bottom: 0;
+        border-left: 2px solid transparent;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -9px;
+        top: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #3498db;
+        border: 3px solid white;
+    }
+    .analysis-progress {
+        height: 10px;
+        border-radius: 5px;
+    }
+    .tag {
+        display: inline-block;
+        background: #f0f8ff;
+        color: #3498db;
+        padding: 0.25rem 0.5rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .leaflet-control-layers {
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    .leaflet-control-layers-toggle {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c3e50'%3E%3Cpath d='M12 4l-8 8h16l-8-8zm0 16l8-8H4l8 8z'/%3E%3C/svg%3E");
+        background-size: 70%;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-8">
-        <h1>Cartes historiques</h1>
-        <p class="lead">Collection de cartes anciennes analysées</p>
+<div class="container-fluid py-4">
+    <!-- En-tête avec bouton d'analyse -->
+    <div class="map-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1><i class="fas fa-map-marked-alt me-2"></i> Cartes Historiques</h1>
+                <p class="lead mb-0">Explorez notre collection exclusive de cartes anciennes et leurs analyses</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-light px-4" onclick="startAnalysis('maps')">
+                    <i class="fas fa-play me-2"></i> Analyser les cartes
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="col-md-4 text-end">
-        <button class="btn btn-primary" onclick="startAnalysis('maps')">
-            Analyser les cartes
-        </button>
-    </div>
-</div>
 
-<div class="row" id="maps-list">
-    {% for map in maps %}
-    <div class="col-md-4 mb-4">
-        <div class="card map-card" onclick="showFullMap('{{ map.id }}')">
-            <img src="/static/images/maps/{{ map.thumbnail }}" class="card-img-top" alt="{{ map.name }}">
-            <div class="card-body">
-                <h5 class="card-title">{{ map.name }}</h5>
-                <p class="card-text">{{ map.description }}</p>
-                <div class="d-flex justify-content-between">
-                    <small class="text-muted">{{ map.year }}</small>
-                    <span class="badge bg-{{ 'success' if map.processed else 'warning' }}">
+    <!-- Cartes historiques -->
+    <div class="row mb-5 g-4">
+        {% for map in maps %}
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card map-card h-100">
+                <div class="position-relative">
+                    <img src="/static/images/maps/{{ map.thumbnail }}" class="card-img-top map-card-img" alt="{{ map.name }}">
+                    <span class="badge map-badge bg-{{ 'success' if map.processed else 'warning' }}">
                         {{ 'Traité' if map.processed else 'En attente' }}
                     </span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ map.name }}</h5>
+                    <p class="card-text text-muted">{{ map.description|truncate(100) }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="far fa-calendar me-1"></i> {{ map.year }}</small>
+                        <button class="btn btn-sm btn-outline-primary" onclick="showFullMap('{{ map.id }}')">
+                            <i class="fas fa-expand me-1"></i> Explorer
+                        </button>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 pt-0">
+                    <div>
+                        {% for tag in map.tags %}
+                        <span class="tag"><i class="fas fa-tag me-1"></i> {{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Carte interactive et filtres -->
+    <div class="row mb-5 g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white border-0">
+                    <h4><i class="fas fa-globe-europe me-2"></i> Carte Interactive</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" class="map-container"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card filter-card">
+                <div class="card-header bg-white border-0">
+                    <h4><i class="fas fa-sliders-h me-2"></i> Filtres & Contrôles</h4>
+                </div>
+                <div class="card-body">
+                    <form id="mapFilters">
+                        <div class="mb-4">
+                            <h6 class="mb-3">Catégories</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filterHistorical" checked>
+                                <label class="form-check-label" for="filterHistorical">
+                                    Sites Historiques
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filterMonuments" checked>
+                                <label class="form-check-label" for="filterMonuments">
+                                    Monuments
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filterParks" checked>
+                                <label class="form-check-label" for="filterParks">
+                                    Parcs & Jardins
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="mb-3">Période Historique</h6>
+                            <input type="range" class="form-range" id="yearRange" min="1000" max="2000" step="50" value="1800">
+                            <div class="d-flex justify-content-between">
+                                <small>1000</small>
+                                <small id="yearValue">1800</small>
+                                <small>2000</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="mb-3">Type de Carte</h6>
+                            <select class="form-select" id="mapType">
+                                <option value="modern">Moderne</option>
+                                <option value="satellite">Satellite</option>
+                                <option value="historical">Historique</option>
+                                <option value="terrain">Terrain</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-1"></i> Appliquer les Filtres
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-    {% endfor %}
+
+    <!-- Analyse et historique -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-white border-0">
+                    <h4><i class="fas fa-chart-line me-2"></i> Progression des Analyses</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <h6 class="mb-0">Analyse Cartographique</h6>
+                            <small>65% complété</small>
+                        </div>
+                        <div class="progress analysis-progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <h6 class="mb-0">Comparaison Historique</h6>
+                            <small>42% complété</small>
+                        </div>
+                        <div class="progress analysis-progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                 role="progressbar" style="width: 42%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <h6 class="mb-0">Détection des Anomalies</h6>
+                            <small>28% complété</small>
+                        </div>
+                        <div class="progress analysis-progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
+                                 role="progressbar" style="width: 28%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-white border-0">
+                    <h4><i class="fas fa-history me-2"></i> Historique des Analyses</h4>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <h6 class="mb-1">Analyse démarrée</h6>
+                            <p class="text-muted small mb-1">Carte de Tartaria (1754)</p>
+                            <p class="small text-muted mb-0">
+                                <i class="far fa-clock me-1"></i> Il y a 2 heures
+                            </p>
+                        </div>
+                        <div class="timeline-item">
+                            <h6 class="mb-1">Comparaison terminée</h6>
+                            <p class="text-muted small mb-1">Cartes du 18ème siècle</p>
+                            <p class="small text-muted mb-0">
+                                <i class="far fa-clock me-1"></i> Aujourd'hui, 09:42
+                            </p>
+                        </div>
+                        <div class="timeline-item">
+                            <h6 class="mb-1">Nouvelle carte importée</h6>
+                            <p class="text-muted small mb-1">Asie Centrale (1806)</p>
+                            <p class="small text-muted mb-0">
+                                <i class="far fa-clock me-1"></i> Hier, 16:30
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Intégration de Leaflet -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-providers/1.12.0/leaflet-providers.min.js"></script>
+
+<script>
+    // Initialiser la carte avec plusieurs couches
+    const map = L.map('map').setView([48.8566, 2.3522], 5);
+    
+    // Couches de base
+    const baseLayers = {
+        "Moderne": L.tileLayer.provider('OpenStreetMap.Mapnik'),
+        "Satellite": L.tileLayer.provider('Esri.WorldImagery'),
+        "Historique": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }),
+        "Terrain": L.tileLayer.provider('OpenTopoMap')
+    };
+    
+    // Ajouter la couche par défaut
+    baseLayers.Moderne.addTo(map);
+    
+    // Ajouter le contrôle des couches
+    L.control.layers(baseLayers).addTo(map);
+    
+    // Marqueurs d'exemple
+    const historicalSites = [
+        { lat: 48.8584, lng: 2.2945, name: "Tour Eiffel", type: "monument" },
+        { lat: 48.8606, lng: 2.3376, name: "Louvre", type: "monument" },
+        { lat: 48.8738, lng: 2.2950, name: "Arc de Triomphe", type: "monument" },
+        { lat: 48.8550, lng: 2.3493, name: "Notre-Dame", type: "monument" }
+    ];
+    
+    historicalSites.forEach(site => {
+        const marker = L.marker([site.lat, site.lng]).addTo(map);
+        marker.bindPopup(`<b>${site.name}</b><br>Type: ${site.type}`);
+    });
+    
+    // Gestion des filtres
+    document.getElementById('yearRange').addEventListener('input', function() {
+        document.getElementById('yearValue').textContent = this.value;
+    });
+    
+    // Gestion du formulaire
+    document.getElementById('mapFilters').addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Ici vous ajouteriez la logique pour filtrer les cartes
+        alert('Filtres appliqués avec succès!');
+    });
+    
+    // Gestion de l'affichage des cartes
+    function showFullMap(mapId) {
+        // Ici vous implémenteriez la logique pour afficher la carte en plein écran
+        window.location.href = `/map/${mapId}`;
+    }
+    
+    // Gestion de l'analyse
+    function startAnalysis(type) {
+        // Ici vous implémenteriez la logique pour démarrer l'analyse
+        alert(`Démarrage de l'analyse ${type}...`);
+    }
+    
+    // Support WebP
+    function supportsWebP() {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = img.onerror = () => resolve(img.height === 2);
+            img.src = 'data:image/webp;base64,UklGRi4AAABXRUJQVlA4TAIAF4QAqQAA3R5cM9tQJlCUgAAAABkJYAzFF52FS1HrdZQ==';
+        });
+    }
+    
+    supportsWebP().then(supported => {
+        if (supported) {
+            document.querySelectorAll('img').forEach(img => {
+                img.src = img.src.replace(/\.(jpg|jpeg|png|gif)$/i, '.webp');
+            });
+        }
+    });
+</script>
 {% endblock %}

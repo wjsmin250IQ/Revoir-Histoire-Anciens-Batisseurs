@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Connexion Sécurisée - Anciens Bâtisseurs{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding-top: 5rem;
+    }
+    .auth-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    .auth-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+    .auth-body {
+        padding: 2rem;
+        background-color: white;
+    }
+    .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+    }
+    .security-tips {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 1.5rem;
+        border-top: 1px solid #eee;
+        padding-top: 1rem;
+    }
+    .strength-meter {
+        height: 5px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+    .strength-meter-fill {
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s, background-color 0.3s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2><i class="fas fa-lock me-2"></i>Authentification Sécurisée</h2>
+            <p class="mb-0">Veuillez entrer vos informations d'identification</p>
+        </div>
+
+        <div class="auth-body">
+            <form method="POST" action="{{ url_for('connexion_mdp') }}" id="loginForm">
+                <!-- Champ Mot de passe -->
+                <div class="mb-4 position-relative">
+                    <label for="password" class="form-label fw-bold">Mot de passe</label>
+                    <div class="input-group">
+                        <input type="password" 
+                               name="password" 
+                               id="password" 
+                               class="form-control form-control-lg" 
+                               placeholder="••••••••" 
+                               required
+                               autocomplete="current-password"
+                               minlength="8">
+                        <span class="password-toggle" id="togglePassword">
+                            <i class="far fa-eye"></i>
+                        </span>
+                    </div>
+                    <div class="strength-meter mt-2">
+                        <div class="strength-meter-fill" id="strengthMeter"></div>
+                    </div>
+                </div>
+
+                <!-- Bouton de connexion -->
+                <button type="submit" class="btn btn-primary btn-lg w-100 py-2">
+                    <i class="fas fa-sign-in-alt me-2"></i> Se connecter
+                </button>
+
+                <!-- Options supplémentaires -->
+                <div class="d-flex justify-content-between mt-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe" name="remember">
+                        <label class="form-check-label" for="rememberMe">Se souvenir de moi</label>
+                    </div>
+                    <a href="{{ url_for('reset_password_request') }}" class="text-decoration-none">Mot de passe oublié ?</a>
+                </div>
+            </form>
+
+            <!-- Affichage des erreurs -->
+            {% if error %}
+            <div class="alert alert-danger mt-4" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <!-- Conseils de sécurité -->
+            <div class="security-tips">
+                <h6><i class="fas fa-shield-alt me-2"></i>Conseils de sécurité :</h6>
+                <ul class="list-unstyled small">
+                    <li><i class="fas fa-check-circle text-success me-1"></i> Ne partagez jamais votre mot de passe</li>
+                    <li><i class="fas fa-check-circle text-success me-1"></i> Utilisez un mot de passe unique</li>
+                    <li><i class="fas fa-check-circle text-success me-1"></i> Vérifiez l'URL avant de vous connecter</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lien pour revenir -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('connexion') }}" class="text-decoration-none">
+            <i class="fas fa-arrow-left me-1"></i> Retour à la page de connexion
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('password');
+        const icon = this.querySelector('i');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    });
+
+    // Password strength meter
+    document.getElementById('password').addEventListener('input', function() {
+        const strengthMeter = document.getElementById('strengthMeter');
+        const strength = calculatePasswordStrength(this.value);
+        
+        strengthMeter.style.width = strength.percentage + '%';
+        strengthMeter.style.backgroundColor = strength.color;
+    });
+
+    function calculatePasswordStrength(password) {
+        let strength = 0;
+        
+        // Length check
+        if (password.length >= 8) strength += 1;
+        if (password.length >= 12) strength += 1;
+        
+        // Character variety
+        if (/[A-Z]/.test(password)) strength += 1;
+        if (/[0-9]/.test(password)) strength += 1;
+        if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+        
+        // Calculate percentage and color
+        const percentage = Math.min(strength * 20, 100);
+        let color = '#dc3545'; // Red
+        
+        if (percentage >= 60) color = '#ffc107'; // Yellow
+        if (percentage >= 80) color = '#28a745'; // Green
+        
+        return { percentage, color };
+    }
+
+    // Prevent paste
+    document.getElementById('password').addEventListener('paste', function(e) {
+        e.preventDefault();
+        showAlert('Le copier-coller est désactivé pour des raisons de sécurité.', 'warning');
+    });
+
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        const form = document.getElementById('loginForm');
+        form.prepend(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.classList.add('show');
+        }, 10);
+    }
+</script>
+{% endblock %}

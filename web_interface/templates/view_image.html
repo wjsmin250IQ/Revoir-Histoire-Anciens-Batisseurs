@@ -1,12 +1,501 @@
 {% extends "base.html" %}
 
-{% block title %}Visualisation - {{ filename }}{% endblock %}
+{% block title %}{{ filename }} - Visualisation HB{% endblock %}
+
+{% block extra_css %}
+<style>
+    .image-viewer-container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 2rem;
+        min-height: 80vh;
+    }
+    .image-header {
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .image-preview-container {
+        position: relative;
+        background-color: #2c3e50;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        overflow: hidden;
+    }
+    .img-preview {
+        max-height: 70vh;
+        width: auto;
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+        transition: transform 0.3s ease;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.2);
+        border-radius: 4px;
+    }
+    .image-toolbar {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.7);
+        border-radius: 50px;
+        padding: 8px 16px;
+        z-index: 10;
+        display: flex;
+        gap: 10px;
+    }
+    .image-toolbar button {
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .image-toolbar button:hover {
+        background: rgba(255,255,255,0.2);
+        transform: translateY(-2px);
+    }
+    .metadata-panel {
+        background-color: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .exif-data {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    .exif-item {
+        padding: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+    .exif-label {
+        font-weight: 600;
+        color: #555;
+        font-size: 0.85rem;
+    }
+    .exif-value {
+        color: #333;
+        word-break: break-word;
+    }
+    .nav-tabs .nav-link.active {
+        font-weight: bold;
+        border-bottom: 3px solid #2c3e50;
+    }
+    .tab-content {
+        padding: 1.5rem 0;
+    }
+    .related-images {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    .related-thumbnail {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .related-thumbnail:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .fullscreen-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.9);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: zoom-out;
+    }
+    .fullscreen-image {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>{{ filename }}</h1>
-    <div class="text-center mt-4">
-        <img src="/{{ image_path }}" alt="{{ filename }}" class="img-fluid img-preview">
+<div class="container-fluid py-4">
+    <div class="image-viewer-container">
+        <!-- En-tête avec informations -->
+        <div class="image-header">
+            <div class="d-flex justify-content-between align-items-start flex-wrap">
+                <div>
+                    <h1>
+                        <i class="fas fa-image me-2"></i>
+                        {{ filename }}
+                    </h1>
+                    <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
+                        <span class="badge bg-secondary">Image</span>
+                        <span class="badge bg-info text-dark">{{ file_extension|upper }}</span>
+                        <span class="badge bg-light text-dark">{{ file_size }}</span>
+                        <span class="text-muted"><i class="far fa-clock me-1"></i> {{ last_modified }}</span>
+                    </div>
+                </div>
+                <div class="btn-group mt-2 mt-md-0">
+                    <a href="/{{ image_path }}" download class="btn btn-primary">
+                        <i class="fas fa-download me-1"></i> Télécharger
+                    </a>
+                    <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#shareModal">
+                        <i class="fas fa-share-alt me-1"></i> Partager
+                    </button>
+                    {% if current_user.is_authenticated %}
+                    <button class="btn btn-outline-info">
+                        <i class="fas fa-edit me-1"></i> Modifier
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglets de navigation -->
+        <ul class="nav nav-tabs" id="imageTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="view-tab" data-bs-toggle="tab" data-bs-target="#view" type="button" role="tab">
+                    <i class="fas fa-eye me-1"></i> Visualisation
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata" type="button" role="tab">
+                    <i class="fas fa-info-circle me-1"></i> Métadonnées
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="related-tab" data-bs-toggle="tab" data-bs-target="#related" type="button" role="tab">
+                    <i class="fas fa-images me-1"></i> Images similaires
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="imageTabsContent">
+            <!-- Onglet Visualisation -->
+            <div class="tab-pane fade show active" id="view" role="tabpanel">
+                <div class="image-preview-container">
+                    <img src="/{{ image_path }}" alt="{{ filename }}" class="img-preview" id="mainImage">
+                    <div class="image-toolbar">
+                        <button id="zoomIn" title="Zoom avant">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button id="zoomOut" title="Zoom arrière">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button id="rotateLeft" title="Tourner à gauche">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <button id="rotateRight" title="Tourner à droite">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <button id="fullscreenBtn" title="Plein écran">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button id="resetImage" title="Réinitialiser">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap mt-3">
+                    <div>
+                        <button class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Précédent
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm ms-2">
+                            Suivant <i class="fas fa-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                    <div class="mt-2 mt-md-0">
+                        <div class="input-group" style="max-width: 200px;">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-sliders-h"></i>
+                            </span>
+                            <input type="range" class="form-range" id="brightnessControl" min="0" max="200" value="100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Métadonnées -->
+            <div class="tab-pane fade" id="metadata" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="metadata-panel mb-4">
+                            <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Informations de base</h5>
+                            <dl class="row">
+                                <dt class="col-sm-4">Nom du fichier</dt>
+                                <dd class="col-sm-8">{{ filename }}</dd>
+
+                                <dt class="col-sm-4">Type</dt>
+                                <dd class="col-sm-8">{{ file_extension|upper }}</dd>
+
+                                <dt class="col-sm-4">Dimensions</dt>
+                                <dd class="col-sm-8" id="imageDimensions">Chargement...</dd>
+
+                                <dt class="col-sm-4">Taille</dt>
+                                <dd class="col-sm-8">{{ file_size }}</dd>
+
+                                <dt class="col-sm-4">Dernière modification</dt>
+                                <dd class="col-sm-8">{{ last_modified }}</dd>
+
+                                <dt class="col-sm-4">Emplacement</dt>
+                                <dd class="col-sm-8">{{ image_path }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="metadata-panel">
+                            <h5 class="mb-3"><i class="fas fa-camera me-2"></i>Métadonnées EXIF</h5>
+                            {% if exif_data %}
+                            <div class="exif-data">
+                                {% for key, value in exif_data.items() %}
+                                <div class="exif-item">
+                                    <div class="exif-label">{{ key }}</div>
+                                    <div class="exif-value">
+                                        {% if value is iterable and value is not string %}
+                                            {{ value|join(", ") }}
+                                        {% else %}
+                                            {{ value }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">
+                                Aucune métadonnée EXIF trouvée dans cette image.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Images similaires -->
+            <div class="tab-pane fade" id="related" role="tabpanel">
+                <h5 class="mb-3"><i class="fas fa-images me-2"></i>Images de la même collection</h5>
+                {% if related_images %}
+                <div class="related-images">
+                    {% for img in related_images %}
+                    <a href="/view_image/{{ img.path }}">
+                        <img src="/{{ img.thumbnail }}" alt="{{ img.name }}" class="related-thumbnail">
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    Aucune image similaire trouvée dans cette collection.
+                </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Modal Partage -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-share-alt me-2"></i>Partager cette image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="shareLink" class="form-label">Lien de partage</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="shareLink" value="{{ url_for('view_image', image_path=image_path, _external=True) }}" readonly>
+                        <button class="btn btn-outline-secondary" id="copyLink">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Partager via</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fab fa-twitter me-1"></i> Twitter
+                        </button>
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fab fa-facebook me-1"></i> Facebook
+                        </button>
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fas fa-envelope me-1"></i> Email
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Code d'intégration</label>
+                    <div class="input-group">
+                        <textarea class="form-control" id="embedCode" rows="2" readonly><img src="{{ url_for('view_image', image_path=image_path, _external=True) }}" alt="{{ filename }}"></textarea>
+                        <button class="btn btn-outline-secondary" id="copyEmbed">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Overlay -->
+<div class="fullscreen-overlay" id="fullscreenOverlay" style="display: none;">
+    <img src="/{{ image_path }}" class="fullscreen-image" id="fullscreenImage">
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Variables pour le zoom et la rotation
+        let currentScale = 1;
+        let currentRotation = 0;
+        const imgElement = $('#mainImage');
+        
+        // Initialiser les dimensions de l'image
+        imgElement.on('load', function() {
+            const width = this.naturalWidth;
+            const height = this.naturalHeight;
+            $('#imageDimensions').text(`${width} × ${height} pixels`);
+        });
+
+        // Zoom avant
+        $('#zoomIn').on('click', function() {
+            currentScale += 0.1;
+            updateImageTransform();
+        });
+        
+        // Zoom arrière
+        $('#zoomOut').on('click', function() {
+            if (currentScale > 0.2) {
+                currentScale -= 0.1;
+                updateImageTransform();
+            }
+        });
+        
+        // Rotation gauche
+        $('#rotateLeft').on('click', function() {
+            currentRotation -= 90;
+            updateImageTransform();
+        });
+        
+        // Rotation droite
+        $('#rotateRight').on('click', function() {
+            currentRotation += 90;
+            updateImageTransform();
+        });
+        
+        // Réinitialiser
+        $('#resetImage').on('click', function() {
+            currentScale = 1;
+            currentRotation = 0;
+            updateImageTransform();
+        });
+        
+        // Plein écran
+        $('#fullscreenBtn').on('click', function() {
+            $('#fullscreenOverlay').fadeIn();
+        });
+        
+        // Quitter le plein écran
+        $('#fullscreenOverlay').on('click', function() {
+            $(this).fadeOut();
+        });
+        
+        // Contrôle de luminosité
+        $('#brightnessControl').on('input', function() {
+            const brightness = $(this).val();
+            imgElement.css('filter', `brightness(${brightness}%)`);
+        });
+        
+        // Copie du lien
+        $('#copyLink').on('click', function() {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            document.execCommand('copy');
+            
+            // Feedback visuel
+            const originalText = $(this).html();
+            $(this).html('<i class="fas fa-check"></i>');
+            setTimeout(() => {
+                $(this).html(originalText);
+            }, 2000);
+        });
+        
+        // Copie du code d'intégration
+        $('#copyEmbed').on('click', function() {
+            const embedCode = document.getElementById('embedCode');
+            embedCode.select();
+            document.execCommand('copy');
+            
+            // Feedback visuel
+            const originalText = $(this).html();
+            $(this).html('<i class="fas fa-check"></i>');
+            setTimeout(() => {
+                $(this).html(originalText);
+            }, 2000);
+        });
+        
+        // Mise à jour des transformations de l'image
+        function updateImageTransform() {
+            imgElement.css({
+                'transform': `scale(${currentScale}) rotate(${currentRotation}deg)`
+            });
+        }
+        
+        // Navigation clavier
+        $(document).keydown(function(e) {
+            // Échap pour quitter le plein écran
+            if (e.key === "Escape") {
+                $('#fullscreenOverlay').fadeOut();
+            }
+            
+            // Touches + et - pour zoomer
+            if (e.key === "+" || e.key === "=") {
+                currentScale += 0.1;
+                updateImageTransform();
+                e.preventDefault();
+            }
+            if (e.key === "-" || e.key === "_") {
+                if (currentScale > 0.2) {
+                    currentScale -= 0.1;
+                    updateImageTransform();
+                    e.preventDefault();
+                }
+            }
+            
+            // Flèches pour rotation
+            if (e.key === "ArrowLeft") {
+                currentRotation -= 90;
+                updateImageTransform();
+                e.preventDefault();
+            }
+            if (e.key === "ArrowRight") {
+                currentRotation += 90;
+                updateImageTransform();
+                e.preventDefault();
+            }
+        });
+    });
+</script>
 {% endblock %}

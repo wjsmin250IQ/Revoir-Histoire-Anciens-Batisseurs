@@ -1,10 +1,134 @@
 {% extends "base.html" %}
 
-{% block title %}Apropos - Anciens Bâtisseurs{% endblock %}
+{% block title %}À propos - Anciens Bâtisseurs{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Apropos</h1>
-    <p>Contenu à venir...</p>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-4 mb-4 text-center"><i class="fas fa-landmark me-2"></i>À propos du Projet</h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 card-title"><i class="fas fa-bullseye me-2"></i>Notre Mission</h2>
+                    <p class="card-text">
+                        Le projet "Anciens Bâtisseurs" vise à documenter, analyser et préserver les connaissances 
+                        sur les civilisations anciennes et leurs réalisations architecturales extraordinaires. 
+                        Nous nous concentrons particulièrement sur les techniques de construction, 
+                        l'ingénierie oubliée et les mystères historiques non résolus.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 card-title"><i class="fas fa-users me-2"></i>Notre Équipe</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-user-tie fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="mt-0">Dr. Élise Marchand</h5>
+                                    <p>Archéologue spécialisée en architecture ancienne</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-user-graduate fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="mt-0">Thomas Lefèvre</h5>
+                                    <p>Historien des technologies anciennes</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-laptop-code fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="mt-0">Sophie Durand</h5>
+                                    <p>Développeuse de la plateforme numérique</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-book fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="mt-0">Marc Bernard</h5>
+                                    <p>Documentaliste et archiviste</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 card-title"><i class="fas fa-history me-2"></i>Origines du Projet</h2>
+                    <p class="card-text">
+                        Fondé en 2018, notre projet est né d'une passion commune pour résoudre les énigmes 
+                        des constructions anciennes qui défient les explications conventionnelles. 
+                        Notre travail s'appuie sur des recherches académiques rigoureuses combinées 
+                        à des technologies modernes d'analyse.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 card-title"><i class="fas fa-database me-2"></i>Nos Sources</h2>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Archives historiques numérisées
+                            <span class="badge bg-primary rounded-pill">12,000+</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Cartes anciennes documentées
+                            <span class="badge bg-primary rounded-pill">850+</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Études académiques référencées
+                            <span class="badge bg-primary rounded-pill">2,300+</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Interviews d'experts
+                            <span class="badge bg-primary rounded-pill">47</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h4 card-title"><i class="fas fa-envelope me-2"></i>Contactez-nous</h2>
+                    <form>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Envoyer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

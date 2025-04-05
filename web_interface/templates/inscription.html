@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block title %}Inscription - Explorateur HB{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        max-width: 600px;
+        margin: 2rem auto;
+    }
+    .auth-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    .auth-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+    .auth-body {
+        padding: 2rem;
+        background-color: white;
+    }
+    .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+        z-index: 5;
+    }
+    .strength-meter {
+        height: 5px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+    .strength-meter-fill {
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s, background-color 0.3s;
+    }
+    .password-requirements {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 1rem;
+    }
+    .requirement {
+        margin-bottom: 0.3rem;
+    }
+    .requirement i {
+        width: 20px;
+        text-align: center;
+    }
+    .requirement.valid {
+        color: #28a745;
+    }
+    .requirement.invalid {
+        color: #6c757d;
+    }
+    .form-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+    .form-group {
+        position: relative;
+    }
+    .form-control {
+        padding-left: 40px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2><i class="fas fa-user-plus me-2"></i>Créer un compte</h2>
+            <p class="mb-0">Rejoignez notre communauté de chercheurs</p>
+        </div>
+
+        <div class="auth-body">
+            <form method="POST" action="{{ url_for('inscription') }}" id="registerForm">
+                <!-- Email -->
+                <div class="form-group mb-4">
+                    <i class="fas fa-envelope form-icon"></i>
+                    <label for="email" class="form-label fw-bold">Adresse email</label>
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           class="form-control form-control-lg" 
+                           placeholder="votre@email.com" 
+                           required
+                           autocomplete="email">
+                </div>
+
+                <!-- Confirmation Email -->
+                <div class="form-group mb-4">
+                    <i class="fas fa-envelope form-icon"></i>
+                    <label for="email_repeat" class="form-label fw-bold">Confirmer l'email</label>
+                    <input type="email" 
+                           id="email_repeat" 
+                           name="email_repeat" 
+                           class="form-control form-control-lg" 
+                           placeholder="confirmer@email.com" 
+                           required
+                           autocomplete="email">
+                    <div id="emailMatch" class="text-danger small mt-1" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i> Les emails ne correspondent pas
+                    </div>
+                </div>
+
+                <!-- Mot de passe -->
+                <div class="form-group mb-4">
+                    <i class="fas fa-lock form-icon"></i>
+                    <label for="password" class="form-label fw-bold">Mot de passe</label>
+                    <div class="position-relative">
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               class="form-control form-control-lg" 
+                               placeholder="••••••••" 
+                               required
+                               autocomplete="new-password"
+                               minlength="8">
+                        <span class="password-toggle" id="togglePassword">
+                            <i class="far fa-eye"></i>
+                        </span>
+                    </div>
+                    <div class="strength-meter mt-2">
+                        <div class="strength-meter-fill" id="strengthMeter"></div>
+                    </div>
+                    <div class="password-requirements">
+                        <div class="requirement invalid" id="reqLength">
+                            <i class="fas fa-circle"></i> 8 caractères minimum
+                        </div>
+                        <div class="requirement invalid" id="reqUpper">
+                            <i class="fas fa-circle"></i> 1 majuscule
+                        </div>
+                        <div class="requirement invalid" id="reqNumber">
+                            <i class="fas fa-circle"></i> 1 chiffre
+                        </div>
+                        <div class="requirement invalid" id="reqSpecial">
+                            <i class="fas fa-circle"></i> 1 caractère spécial
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirmation Mot de passe -->
+                <div class="form-group mb-4">
+                    <i class="fas fa-lock form-icon"></i>
+                    <label for="password_repeat" class="form-label fw-bold">Confirmer le mot de passe</label>
+                    <div class="position-relative">
+                        <input type="password" 
+                               id="password_repeat" 
+                               name="password_repeat" 
+                               class="form-control form-control-lg" 
+                               placeholder="••••••••" 
+                               required
+                               autocomplete="new-password">
+                        <span class="password-toggle" id="togglePasswordRepeat">
+                            <i class="far fa-eye"></i>
+                        </span>
+                    </div>
+                    <div id="passwordMatch" class="text-danger small mt-1" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i> Les mots de passe ne correspondent pas
+                    </div>
+                </div>
+
+                <!-- Conditions d'utilisation -->
+                <div class="mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                        <label class="form-check-label" for="terms">
+                            J'accepte les <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">conditions d'utilisation</a>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Bouton d'inscription -->
+                <button type="submit" class="btn btn-primary btn-lg w-100 py-2 mb-3">
+                    <i class="fas fa-user-plus me-2"></i> S'inscrire
+                </button>
+
+                <!-- Lien vers la connexion -->
+                <div class="text-center">
+                    <p class="mb-0">Déjà membre ? <a href="{{ url_for('connexion') }}" class="text-decoration-none">Se connecter</a></p>
+                </div>
+            </form>
+
+            <!-- Affichage des erreurs -->
+            {% if error %}
+            <div class="alert alert-danger mt-4" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal Conditions d'utilisation -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Conditions d'utilisation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Acceptation des conditions</h6>
+                <p>En créant un compte, vous acceptez de respecter nos conditions d'utilisation...</p>
+                
+                <h6>2. Utilisation des données</h6>
+                <p>Les données historiques partagées sur cette plateforme sont destinées à la recherche...</p>
+                
+                <h6>3. Responsabilités</h6>
+                <p>Vous êtes responsable de la confidentialité de votre compte et mot de passe...</p>
+                
+                <h6>4. Propriété intellectuelle</h6>
+                <p>Tous les contenus publiés restent la propriété de leurs auteurs respectifs...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">J'ai compris</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Toggle password visibility
+        $('#togglePassword, #togglePasswordRepeat').on('click', function() {
+            const input = $(this).siblings('input');
+            const icon = $(this).find('i');
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                input.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+
+        // Check email match
+        $('#email_repeat').on('keyup', function() {
+            const email = $('#email').val();
+            const emailRepeat = $(this).val();
+            const matchDiv = $('#emailMatch');
+            
+            if (email !== emailRepeat && emailRepeat.length > 0) {
+                matchDiv.show();
+            } else {
+                matchDiv.hide();
+            }
+        });
+
+        // Check password strength
+        $('#password').on('keyup', function() {
+            const password = $(this).val();
+            const strength = calculatePasswordStrength(password);
+            
+            // Update strength meter
+            $('#strengthMeter').css({
+                'width': strength.percentage + '%',
+                'background-color': strength.color
+            });
+            
+            // Update requirements
+            updateRequirement('reqLength', password.length >= 8);
+            updateRequirement('reqUpper', /[A-Z]/.test(password));
+            updateRequirement('reqNumber', /[0-9]/.test(password));
+            updateRequirement('reqSpecial', /[^A-Za-z0-9]/.test(password));
+            
+            // Check password match
+            checkPasswordMatch();
+        });
+
+        // Check password match
+        $('#password_repeat').on('keyup', checkPasswordMatch);
+
+        function checkPasswordMatch() {
+            const password = $('#password').val();
+            const passwordRepeat = $('#password_repeat').val();
+            const matchDiv = $('#passwordMatch');
+            
+            if (password !== passwordRepeat && passwordRepeat.length > 0) {
+                matchDiv.show();
+            } else {
+                matchDiv.hide();
+            }
+        }
+
+        function updateRequirement(id, isValid) {
+            const element = $('#' + id);
+            if (isValid) {
+                element.removeClass('invalid').addClass('valid');
+                element.find('i').removeClass('fa-circle').addClass('fa-check-circle');
+            } else {
+                element.removeClass('valid').addClass('invalid');
+                element.find('i').removeClass('fa-check-circle').addClass('fa-circle');
+            }
+        }
+
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            
+            // Length check
+            if (password.length >= 8) strength += 1;
+            if (password.length >= 12) strength += 1;
+            
+            // Character variety
+            if (/[A-Z]/.test(password)) strength += 1;
+            if (/[0-9]/.test(password)) strength += 1;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+            
+            // Calculate percentage and color
+            const percentage = Math.min(strength * 20, 100);
+            let color = '#dc3545'; // Red
+            
+            if (percentage >= 60) color = '#ffc107'; // Yellow
+            if (percentage >= 80) color = '#28a745'; // Green
+            
+            return { percentage, color };
+        }
+
+        // Prevent paste in password fields
+        $('#password, #password_repeat').on('paste', function(e) {
+            e.preventDefault();
+            showAlert('Le copier-coller est désactivé pour des raisons de sécurité.', 'warning');
+        });
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle me-2"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            const form = document.getElementById('registerForm');
+            form.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alertDiv);
+                bsAlert.close();
+            }, 5000);
+        }
+
+        // Form validation
+        $('#registerForm').on('submit', function(e) {
+            const email = $('#email').val();
+            const emailRepeat = $('#email_repeat').val();
+            const password = $('#password').val();
+            const passwordRepeat = $('#password_repeat').val();
+            const termsChecked = $('#terms').is(':checked');
+            
+            if (email !== emailRepeat) {
+                e.preventDefault();
+                showAlert('Les adresses email ne correspondent pas.', 'danger');
+                return false;
+            }
+            
+            if (password !== passwordRepeat) {
+                e.preventDefault();
+                showAlert('Les mots de passe ne correspondent pas.', 'danger');
+                return false;
+            }
+            
+            if (!termsChecked) {
+                e.preventDefault();
+                showAlert('Vous devez accepter les conditions d\'utilisation.', 'danger');
+                return false;
+            }
+            
+            if (password.length < 8) {
+                e.preventDefault();
+                showAlert('Le mot de passe doit contenir au moins 8 caractères.', 'danger');
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}

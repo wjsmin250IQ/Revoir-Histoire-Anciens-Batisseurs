@@ -1,10 +1,525 @@
 {% extends "base.html" %}
 
-{% block title %}Theories - Anciens Bâtisseurs{% endblock %}
+{% block title %}Théories - Anciens Bâtisseurs{% endblock %}
+
+{% block extra_css %}
+<style>
+    .theory-header {
+        background: linear-gradient(135deg, rgba(139, 69, 19, 0.9) 0%, rgba(210, 105, 30, 0.9) 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 3rem 2rem;
+        margin-bottom: 2rem;
+        background-image: url('/static/images/theory-bg.jpg');
+        background-blend-mode: overlay;
+        background-size: cover;
+        background-position: center;
+    }
+    .theory-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        overflow: hidden;
+    }
+    .theory-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .theory-card-img {
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+    .theory-card:hover .theory-card-img {
+        transform: scale(1.05);
+    }
+    .theory-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.8rem;
+    }
+    .theory-tag {
+        display: inline-block;
+        background: #f0f0f0;
+        color: #555;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+        padding-left: 2rem;
+        border-left: 2px solid #e9ecef;
+    }
+    .timeline-item:last-child {
+        padding-bottom: 0;
+        border-left: 2px solid transparent;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -9px;
+        top: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #d2691e;
+        border: 3px solid white;
+    }
+    .evidence-meter {
+        height: 8px;
+        border-radius: 5px;
+        background: #e9ecef;
+    }
+    .evidence-meter-fill {
+        height: 100%;
+        border-radius: 5px;
+        background: linear-gradient(90deg, #8b4513 0%, #d2691e 100%);
+    }
+    .contributor-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+    .theory-nav {
+        position: sticky;
+        top: 20px;
+    }
+    .theory-nav .nav-link {
+        color: #555;
+        border-left: 3px solid transparent;
+        padding: 0.5rem 1rem;
+    }
+    .theory-nav .nav-link.active {
+        color: #d2691e;
+        border-left: 3px solid #d2691e;
+        background: #f8f9fa;
+    }
+    .theory-nav .nav-link:hover {
+        color: #8b4513;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Theories</h1>
-    <p>Contenu à venir...</p>
+<div class="container-fluid py-4">
+    <!-- En-tête -->
+    <div class="theory-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1><i class="fas fa-lightbulb me-2"></i> Théories des Anciens Bâtisseurs</h1>
+                <p class="lead mb-0">Explorez les hypothèses et découvertes sur les civilisations anciennes</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-light px-4" data-bs-toggle="modal" data-bs-target="#newTheoryModal">
+                    <i class="fas fa-plus me-2"></i> Proposer une théorie
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Navigation -->
+        <div class="col-lg-3 mb-4">
+            <div class="card theory-nav">
+                <div class="card-header bg-white">
+                    <h5><i class="fas fa-filter me-2"></i>Filtrer par</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-filter="all">
+                                <i class="fas fa-layer-group me-2"></i> Toutes les théories
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-filter="architecture">
+                                <i class="fas fa-archway me-2"></i> Architecture
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-filter="technologie">
+                                <i class="fas fa-cogs me-2"></i> Technologies
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-filter="civilisation">
+                                <i class="fas fa-globe-americas me-2"></i> Civilisations
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-filter="recent">
+                                <i class="fas fa-clock me-2"></i> Récentes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-filter="evidence">
+                                <i class="fas fa-star me-2"></i> Mieux documentées
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Théories populaires -->
+            <div class="card mt-4">
+                <div class="card-header bg-white">
+                    <h5><i class="fas fa-fire me-2"></i>Populaires</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex align-items-center">
+                                <img src="/static/images/contributors/1.jpg" class="contributor-avatar">
+                                <div>
+                                    <h6 class="mb-1">Technologie perdue</h6>
+                                    <small class="text-muted">Par Dr. Élise Marchand</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex align-items-center">
+                                <img src="/static/images/contributors/2.jpg" class="contributor-avatar">
+                                <div>
+                                    <h6 class="mb-1">Alignements cosmiques</h6>
+                                    <small class="text-muted">Par Prof. Thomas Lefèvre</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex align-items-center">
+                                <img src="/static/images/contributors/3.jpg" class="contributor-avatar">
+                                <div>
+                                    <h6 class="mb-1">Connexion mondiale</h6>
+                                    <small class="text-muted">Par Marc Bernard</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="col-lg-9">
+            <!-- Théories en vedette -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0"><i class="fas fa-star me-2"></i>Théories en vedette</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card theory-card h-100">
+                                <div class="position-relative">
+                                    <img src="/static/images/theories/tech-perdue.jpg" class="card-img-top theory-card-img" alt="Technologie perdue">
+                                    <span class="badge theory-badge bg-success">Confirmée</span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">Technologie de construction perdue</h5>
+                                    <p class="card-text text-muted">Hypothèse sur les méthodes avancées de construction des pyramides et autres mégalithes.</p>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between small text-muted mb-1">
+                                            <span>Niveau de preuve</span>
+                                            <span>85%</span>
+                                        </div>
+                                        <div class="evidence-meter">
+                                            <div class="evidence-meter-fill" style="width: 85%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <img src="/static/images/contributors/1.jpg" class="contributor-avatar">
+                                            <small class="text-muted">Dr. Élise Marchand</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-book-open me-1"></i> Lire
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-0 pt-0">
+                                    <div>
+                                        <span class="theory-tag"><i class="fas fa-tag me-1"></i> technologie</span>
+                                        <span class="theory-tag"><i class="fas fa-tag me-1"></i> pyramides</span>
+                                        <span class="theory-tag"><i class="fas fa-tag me-1"></i> mégalithes</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card theory-card h-100">
+                                <div class="position-relative">
+                                    <img src="/static/images/theories/civilisation-avancee.jpg" class="card-img-top theory-card-img" alt="Civilisation avancée">
+                                    <span class="badge theory-badge bg-warning text-dark">En investigation</span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">Civilisation mondiale avancée</h5>
+                                    <p class="card-text text-muted">Théorie d'une civilisation globale pré-diluvienne avec des connaissances avancées.</p>
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between small text-muted mb-1">
+                                            <span>Niveau de preuve</span>
+                                            <span>62%</span>
+                                        </div>
+                                        <div class="evidence-meter">
+                                            <div class="evidence-meter-fill" style="width: 62%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <img src="/static/images/contributors/2.jpg" class="contributor-avatar">
+                                            <small class="text-muted">Prof. Thomas Lefèvre</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-book-open me-1"></i> Lire
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-0 pt-0">
+                                    <div>
+                                        <span class="theory-tag"><i class="fas fa-tag me-1"></i> civilisation</span>
+                                        <span class="theory-tag"><i class="fas fa-tag me-1"></i> préhistoire</span>
+                                        <span class="theory-tag"><i class="fas fa-tag me-1"></i> globalisation</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toutes les théories -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="fas fa-list me-2"></i>Toutes les théories</h4>
+                        <div class="input-group" style="max-width: 300px;">
+                            <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" placeholder="Rechercher...">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">Alignements astronomiques des sites anciens</h5>
+                                    <p class="mb-1 text-muted">Corrélations entre les positions des sites archéologiques et les constellations.</p>
+                                    <div class="d-flex align-items-center">
+                                        <small class="text-muted me-3"><i class="far fa-calendar me-1"></i> 15 Mars 2023</small>
+                                        <small class="text-muted"><i class="fas fa-tag me-1"></i> astronomie, architecture</small>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="evidence-meter mb-2" style="width: 100px; margin-left: auto;">
+                                        <div class="evidence-meter-fill" style="width: 78%"></div>
+                                    </div>
+                                    <span class="badge bg-light text-dark">78% de preuves</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">Technologie sonique dans la construction</h5>
+                                    <p class="mb-1 text-muted">Utilisation présumée des ondes sonores pour déplacer et sculpter les mégalithes.</p>
+                                    <div class="d-flex align-items-center">
+                                        <small class="text-muted me-3"><i class="far fa-calendar me-1"></i> 2 Février 2023</small>
+                                        <small class="text-muted"><i class="fas fa-tag me-1"></i> technologie, acoustique</small>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="evidence-meter mb-2" style="width: 100px; margin-left: auto;">
+                                        <div class="evidence-meter-fill" style="width: 65%"></div>
+                                    </div>
+                                    <span class="badge bg-light text-dark">65% de preuves</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">Connexion transatlantique précolombienne</h5>
+                                    <p class="mb-1 text-muted">Échanges culturels et technologiques entre l'Ancien et le Nouveau Monde avant Colomb.</p>
+                                    <div class="d-flex align-items-center">
+                                        <small class="text-muted me-3"><i class="far fa-calendar me-1"></i> 10 Janvier 2023</small>
+                                        <small class="text-muted"><i class="fas fa-tag me-1"></i> civilisation, navigation</small>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="evidence-meter mb-2" style="width: 100px; margin-left: auto;">
+                                        <div class="evidence-meter-fill" style="width: 72%"></div>
+                                    </div>
+                                    <span class="badge bg-light text-dark">72% de preuves</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <nav aria-label="Navigation des théories">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">Précédent</a>
+                            </li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Suivant</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Dernières contributions -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0"><i class="fas fa-clock me-2"></i>Activité récente</h4>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <h6 class="mb-1">Nouvelle théorie ajoutée</h6>
+                            <p class="text-muted small mb-1">"Technologie des pierres molles" par Dr. Sophie Durand</p>
+                            <p class="small text-muted mb-0">
+                                <i class="far fa-clock me-1"></i> Il y a 2 heures
+                            </p>
+                        </div>
+                        <div class="timeline-item">
+                            <h6 class="mb-1">Preuve ajoutée</h6>
+                            <p class="text-muted small mb-1">Document sur les alignements astronomiques</p>
+                            <p class="small text-muted mb-0">
+                                <i class="far fa-clock me-1"></i> Aujourd'hui, 09:42
+                            </p>
+                        </div>
+                        <div class="timeline-item">
+                            <h6 class="mb-1">Théorie mise à jour</h6>
+                            <p class="text-muted small mb-1">"Connexion transatlantique" avec nouvelles données</p>
+                            <p class="small text-muted mb-0">
+                                <i class="far fa-clock me-1"></i> Hier, 16:30
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Modal Nouvelle théorie -->
+<div class="modal fade" id="newTheoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-lightbulb me-2"></i> Proposer une nouvelle théorie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="theoryForm">
+                <div class="modal-body">
+                    <div class="form-group mb-4">
+                        <label for="theoryTitle" class="form-label fw-bold">Titre de la théorie</label>
+                        <input type="text" class="form-control form-control-lg" id="theoryTitle" placeholder="Ex: Technologie sonique des anciens" required>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="theoryDescription" class="form-label fw-bold">Description</label>
+                        <textarea class="form-control" id="theoryDescription" rows="5" placeholder="Décrivez votre théorie en détail..." required></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-4">
+                                <label for="theoryCategory" class="form-label fw-bold">Catégorie</label>
+                                <select class="form-select" id="theoryCategory" required>
+                                    <option value="">Sélectionner une catégorie</option>
+                                    <option value="architecture">Architecture</option>
+                                    <option value="technology">Technologie</option>
+                                    <option value="civilization">Civilisation</option>
+                                    <option value="astronomy">Astronomie</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-4">
+                                <label for="theoryEvidence" class="form-label fw-bold">Niveau de preuve initial</label>
+                                <input type="range" class="form-range" id="theoryEvidence" min="0" max="100" step="5" value="50">
+                                <div class="d-flex justify-content-between">
+                                    <small>0%</small>
+                                    <small id="evidenceValue">50%</small>
+                                    <small>100%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="theoryTags" class="form-label fw-bold">Mots-clés</label>
+                        <input type="text" class="form-control" id="theoryTags" placeholder="Ex: mégalithes, son, vibration (séparés par des virgules)">
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="theoryImage" class="form-label fw-bold">Image illustrative (optionnel)</label>
+                        <input type="file" class="form-control" id="theoryImage" accept="image/*">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Soumettre la théorie</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Gestion de la valeur de preuve
+        $('#theoryEvidence').on('input', function() {
+            $('#evidenceValue').text(this.value + '%');
+        });
+
+        // Filtrage des théories
+        $('.theory-nav .nav-link').on('click', function(e) {
+            e.preventDefault();
+            $('.theory-nav .nav-link').removeClass('active');
+            $(this).addClass('active');
+            // Ici vous ajouteriez la logique pour filtrer les théories
+        });
+
+        // Animation des cartes
+        $('.theory-card').hover(
+            function() {
+                $(this).find('.theory-card-img').css('transform', 'scale(1.05)');
+            }, 
+            function() {
+                $(this).find('.theory-card-img').css('transform', 'scale(1)');
+            }
+        );
+
+        // Validation du formulaire
+        $('#theoryForm').on('submit', function(e) {
+            e.preventDefault();
+            // Ici vous ajouteriez la logique pour soumettre la théorie
+            alert('Théorie soumise avec succès! Elle sera examinée par nos chercheurs.');
+            $('#newTheoryModal').modal('hide');
+        });
+    });
+</script>
 {% endblock %}

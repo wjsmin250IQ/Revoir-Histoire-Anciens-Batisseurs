@@ -1,81 +1,457 @@
 {% extends "base.html" %}
 
-{% block title %}Visualisation - {{ file.Name }}{% endblock %}
+{% block title %}{{ file.Name }} - Explorateur HB{% endblock %}
+
+{% block extra_css %}
+<style>
+    .file-viewer-container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 2rem;
+    }
+    .file-header {
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+    .file-preview {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .img-preview {
+        max-height: 70vh;
+        width: auto;
+        max-width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .data-table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .data-table th {
+        background-color: #2c3e50;
+        color: white;
+        white-space: nowrap;
+    }
+    .metadata-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .action-btn {
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+    .code-viewer {
+        font-family: 'Courier New', monospace;
+        background-color: #f5f5f5;
+        padding: 1rem;
+        border-radius: 8px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    .json-key {
+        color: #d2691e;
+        font-weight: bold;
+    }
+    .json-string {
+        color: #28a745;
+    }
+    .json-number {
+        color: #17a2b8;
+    }
+    .json-boolean {
+        color: #dc3545;
+    }
+    .json-null {
+        color: #6c757d;
+    }
+    .tab-content {
+        padding: 1.5rem 0;
+    }
+    .nav-tabs .nav-link.active {
+        font-weight: bold;
+        border-bottom: 3px solid #2c3e50;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <h2>{{ file.Name }}</h2>
-        <p class="mb-0">
-            <span class="badge bg-secondary">{{ file.Category }}</span>
-            <span class="badge bg-info text-dark">{{ file.Type|upper }}</span>
-            <span class="text-muted">{{ file.Size }} • {{ file.Modified }}</span>
-        </p>
-    </div>
-    
-    <div class="card-body">
-        {% if file.Type in ['jpg', 'jpeg', 'png', 'webp'] %}
-        <div class="text-center">
-            <img src="/{{ file.Path }}" alt="{{ file.Name }}" class="img-fluid img-preview">
+<div class="container-fluid py-4">
+    <div class="file-viewer-container">
+        <!-- En-tête avec métadonnées -->
+        <div class="file-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1>
+                        <i class="fas 
+                            {% if file.Type in ['jpg','jpeg','png','webp'] %}fa-image 
+                            {% elif file.Type == 'json' %}fa-code 
+                            {% elif file.Type == 'csv' %}fa-table 
+                            {% elif file.Type in ['txt','md'] %}fa-file-alt 
+                            {% else %}fa-file{% endif %} 
+                            me-2">
+                        </i>
+                        {{ file.Name }}
+                    </h1>
+                    <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
+                        <span class="badge bg-secondary">{{ file.Category }}</span>
+                        <span class="badge bg-info text-dark">{{ file.Type|upper }}</span>
+                        <span class="badge bg-light text-dark">{{ file.Size }}</span>
+                        <span class="text-muted"><i class="far fa-clock me-1"></i> {{ file.Modified }}</span>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <a href="/download/{{ file.Path }}" class="btn btn-primary action-btn">
+                        <i class="fas fa-download me-1"></i> Télécharger
+                    </a>
+                    <button class="btn btn-outline-secondary action-btn" data-bs-toggle="modal" data-bs-target="#shareModal">
+                        <i class="fas fa-share-alt me-1"></i> Partager
+                    </button>
+                    {% if current_user.is_authenticated %}
+                    <button class="btn btn-outline-info action-btn">
+                        <i class="fas fa-tag me-1"></i> Étiqueter
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        
-        {% elif file.Type == 'json' %}
-        <div class="table-responsive">
-            <table class="table table-bordered data-table">
-                <tbody>
-                    {% for key, value in content.items() %}
-                    <tr>
-                        <th>{{ key }}</th>
-                        <td>
-                            {% if value is iterable and value is not string %}
-                                {{ value|join(", ") }}
-                            {% else %}
-                                {{ value }}
+
+        <!-- Contenu principal avec onglets -->
+        <ul class="nav nav-tabs" id="fileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview" type="button" role="tab">
+                    <i class="fas fa-eye me-1"></i> Aperçu
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata" type="button" role="tab">
+                    <i class="fas fa-info-circle me-1"></i> Métadonnées
+                </button>
+            </li>
+            {% if file.Type in ['json','csv','txt','md'] %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="raw-tab" data-bs-toggle="tab" data-bs-target="#raw" type="button" role="tab">
+                    <i class="fas fa-code me-1"></i> Code source
+                </button>
+            </li>
+            {% endif %}
+        </ul>
+
+        <div class="tab-content" id="fileTabsContent">
+            <!-- Onglet Aperçu -->
+            <div class="tab-pane fade show active" id="preview" role="tabpanel">
+                <div class="file-preview">
+                    {% if file.Type in ['jpg', 'jpeg', 'png', 'webp'] %}
+                    <div class="text-center">
+                        <img src="/{{ file.Path }}" alt="{{ file.Name }}" class="img-preview">
+                        <div class="mt-3">
+                            <button class="btn btn-outline-primary" id="zoomIn">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button class="btn btn-outline-primary" id="zoomOut">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button class="btn btn-outline-primary" id="fullscreen">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    {% elif file.Type == 'json' %}
+                    <div class="table-responsive">
+                        <table class="table data-table">
+                            <tbody>
+                                {% for key, value in content.items() %}
+                                <tr>
+                                    <th width="30%">{{ key }}</th>
+                                    <td>
+                                        {% if value is iterable and value is not string %}
+                                            {{ value|join(", ") }}
+                                        {% else %}
+                                            {{ value }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% elif file.Type == 'csv' %}
+                    <div class="table-responsive">
+                        <table class="table table-striped data-table">
+                            <thead>
+                                <tr>
+                                    {% for header in content[0].keys() %}
+                                    <th>{{ header }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in content %}
+                                <tr>
+                                    {% for value in row.values() %}
+                                    <td>{{ value }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% elif file.Type in ['txt', 'md'] %}
+                    <div class="list-group">
+                        {% for line in content.split('\n') %}
+                            {% if line.strip() %}
+                            <div class="list-group-item">
+                                {% if line.startswith('#') %}
+                                    <h5>{{ line.replace('#', '').strip() }}</h5>
+                                {% elif line.startswith('//') %}
+                                    <small class="text-muted">{{ line.replace('//', '').strip() }}</small>
+                                {% else %}
+                                    {{ line }}
+                                {% endif %}
+                            </div>
                             {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        
-        {% elif file.Type == 'csv' %}
-        <div class="table-responsive">
-            <table class="table table-bordered data-table">
-                <thead>
-                    <tr>
-                        {% for header in content[0].keys() %}
-                        <th>{{ header }}</th>
                         {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in content %}
-                    <tr>
-                        {% for value in row.values() %}
-                        <td>{{ value }}</td>
-                        {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </div>
+
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Ce type de fichier ne peut pas être prévisualisé directement.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Onglet Métadonnées -->
+            <div class="tab-pane fade" id="metadata" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card metadata-card mb-4">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informations de base</h5>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Nom du fichier</dt>
+                                    <dd class="col-sm-8">{{ file.Name }}</dd>
+
+                                    <dt class="col-sm-4">Type</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge bg-info text-dark">{{ file.Type|upper }}</span>
+                                    </dd>
+
+                                    <dt class="col-sm-4">Catégorie</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge bg-secondary">{{ file.Category }}</span>
+                                    </dd>
+
+                                    <dt class="col-sm-4">Taille</dt>
+                                    <dd class="col-sm-8">{{ file.Size }}</dd>
+
+                                    <dt class="col-sm-4">Dernière modification</dt>
+                                    <dd class="col-sm-8">{{ file.Modified }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card metadata-card">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Statistiques</h5>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    {% if file.Type in ['json','csv'] %}
+                                    <dt class="col-sm-4">Nombre d'entrées</dt>
+                                    <dd class="col-sm-8">{{ content|length }}</dd>
+                                    {% endif %}
+
+                                    {% if file.Type == 'csv' and content[0] %}
+                                    <dt class="col-sm-4">Colonnes</dt>
+                                    <dd class="col-sm-8">{{ content[0].keys()|length }}</dd>
+                                    {% endif %}
+
+                                    {% if file.Type in ['txt','md'] %}
+                                    <dt class="col-sm-4">Lignes</dt>
+                                    <dd class="col-sm-8">{{ content.split('\n')|length }}</dd>
+                                    {% endif %}
+
+                                    <dt class="col-sm-4">Date d'ajout</dt>
+                                    <dd class="col-sm-8">{{ file.Added or 'Inconnue' }}</dd>
+
+                                    <dt class="col-sm-4">Ajouté par</dt>
+                                    <dd class="col-sm-8">{{ file.Owner or 'Système' }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Code source -->
+            {% if file.Type in ['json','csv','txt','md'] %}
+            <div class="tab-pane fade" id="raw" role="tabpanel">
+                <div class="file-preview">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="fas fa-code me-2"></i>Contenu brut</h5>
+                        <button class="btn btn-sm btn-outline-primary" id="copyRaw">
+                            <i class="fas fa-copy me-1"></i> Copier
+                        </button>
+                    </div>
+                    <pre class="code-viewer" id="rawContent">{% if file.Type == 'json' %}{{ content|tojson(indent=2) }}{% else %}{{ content }}{% endif %}</pre>
+                </div>
+            </div>
+            {% endif %}
         </div>
-        
-        {% elif file.Type in ['txt', 'md'] %}
-        <div class="list-group">
-            {% for line in content.split('\n') %}
-                {% if line.strip() and not line.startswith('#') and not line.startswith('//') %}
-                <div class="list-group-item">{{ line }}</div>
-                {% endif %}
-            {% endfor %}
-        </div>
-        
-        {% else %}
-        <div class="alert alert-info">
-            Ce type de fichier ne peut pas être prévisualisé directement.
-        </div>
-        <a href="/download/{{ file.Path }}" class="btn btn-primary">Télécharger le fichier</a>
-        {% endif %}
     </div>
 </div>
+
+<!-- Modal Partage -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-share-alt me-2"></i>Partager ce fichier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="shareLink" class="form-label">Lien de partage</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="shareLink" value="{{ url_for('view_file', file_path=file.Path, _external=True) }}" readonly>
+                        <button class="btn btn-outline-secondary" id="copyLink">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Partager via</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fab fa-twitter me-1"></i> Twitter
+                        </button>
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fab fa-facebook me-1"></i> Facebook
+                        </button>
+                        <button class="btn btn-outline-primary flex-grow-1">
+                            <i class="fas fa-envelope me-1"></i> Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Gestion des onglets
+        $('#fileTabs button').on('click', function(e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+
+        // Zoom image
+        let currentScale = 1;
+        const imgElement = $('.img-preview');
+        
+        $('#zoomIn').on('click', function() {
+            currentScale += 0.1;
+            imgElement.css('transform', `scale(${currentScale})`);
+        });
+        
+        $('#zoomOut').on('click', function() {
+            if (currentScale > 0.2) {
+                currentScale -= 0.1;
+                imgElement.css('transform', `scale(${currentScale})`);
+            }
+        });
+        
+        $('#fullscreen').on('click', function() {
+            if (!document.fullscreenElement) {
+                imgElement[0].requestFullscreen().catch(err => {
+                    alert(`Erreur fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // Copie du lien
+        $('#copyLink').on('click', function() {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            document.execCommand('copy');
+            
+            // Feedback visuel
+            const originalText = $(this).html();
+            $(this).html('<i class="fas fa-check"></i>');
+            setTimeout(() => {
+                $(this).html(originalText);
+            }, 2000);
+        });
+
+        // Copie du contenu brut
+        $('#copyRaw').on('click', function() {
+            const rawContent = document.getElementById('rawContent');
+            const range = document.createRange();
+            range.selectNode(rawContent);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            
+            // Feedback visuel
+            const originalText = $(this).html();
+            $(this).html('<i class="fas fa-check me-1"></i> Copié!');
+            setTimeout(() => {
+                $(this).html('<i class="fas fa-copy me-1"></i> Copier');
+            }, 2000);
+        });
+
+        // Mise en forme syntaxique pour JSON
+        {% if file.Type == 'json' %}
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(
+                /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+                function(match) {
+                    let cls = 'json-number';
+                    if (/^"/.test(match)) {
+                        if (/:$/.test(match)) {
+                            cls = 'json-key';
+                        } else {
+                            cls = 'json-string';
+                        }
+                    } else if (/true|false/.test(match)) {
+                        cls = 'json-boolean';
+                    } else if (/null/.test(match)) {
+                        cls = 'json-null';
+                    }
+                    return '<span class="' + cls + '">' + match + '</span>';
+                }
+            );
+        }
+
+        const rawContent = document.getElementById('rawContent');
+        rawContent.innerHTML = syntaxHighlight(rawContent.textContent);
+        {% endif %}
+    });
+</script>
 {% endblock %}
