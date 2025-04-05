@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Visualisation - {{ file.Name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>{{ file.Name }}</h2>
+        <p class="mb-0">
+            <span class="badge bg-secondary">{{ file.Category }}</span>
+            <span class="badge bg-info text-dark">{{ file.Type|upper }}</span>
+            <span class="text-muted">{{ file.Size }} • {{ file.Modified }}</span>
+        </p>
+    </div>
+    
+    <div class="card-body">
+        {% if file.Type in ['jpg', 'jpeg', 'png', 'webp'] %}
+        <div class="text-center">
+            <img src="/{{ file.Path }}" alt="{{ file.Name }}" class="img-fluid img-preview">
+        </div>
+        
+        {% elif file.Type == 'json' %}
+        <div class="table-responsive">
+            <table class="table table-bordered data-table">
+                <tbody>
+                    {% for key, value in content.items() %}
+                    <tr>
+                        <th>{{ key }}</th>
+                        <td>
+                            {% if value is iterable and value is not string %}
+                                {{ value|join(", ") }}
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% elif file.Type == 'csv' %}
+        <div class="table-responsive">
+            <table class="table table-bordered data-table">
+                <thead>
+                    <tr>
+                        {% for header in content[0].keys() %}
+                        <th>{{ header }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in content %}
+                    <tr>
+                        {% for value in row.values() %}
+                        <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% elif file.Type in ['txt', 'md'] %}
+        <div class="list-group">
+            {% for line in content.split('\n') %}
+                {% if line.strip() and not line.startswith('#') and not line.startswith('//') %}
+                <div class="list-group-item">{{ line }}</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% else %}
+        <div class="alert alert-info">
+            Ce type de fichier ne peut pas être prévisualisé directement.
+        </div>
+        <a href="/download/{{ file.Path }}" class="btn btn-primary">Télécharger le fichier</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

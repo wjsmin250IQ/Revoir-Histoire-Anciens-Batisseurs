@@ -1,0 +1,9 @@
+import json
+
+def load_sources():
+    sources = []
+    for file in os.listdir('data/sources'):
+        if file.endswith('.json'):
+            with open(f'data/sources/{file}') as f:
+                sources.extend(json.load(f))
+    return sources

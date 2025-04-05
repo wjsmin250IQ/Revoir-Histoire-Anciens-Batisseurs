@@ -2,6 +2,11 @@
 import yaml
 from data_processor import process_all_sources
 from api_integration import update_metadata
+import sys
+sys.path.append("C:/Users/HP/Desktop/Revoir-Histoire-Anciens-Batisseurs-master/scripts")
+
+
+
 
 def main():
     # Chargement config

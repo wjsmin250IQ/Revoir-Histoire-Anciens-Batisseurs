@@ -2,34 +2,24 @@
 .SYNOPSIS
     Script de gestion complet pour le projet "Revoir-Histoire-Anciens-Batisseurs"
 .DESCRIPTION
-    Automatise l'installation, la conversion des données, l'analyse et la visualisation
+    Automatise l'installation, la conversion des données (via fonctions natives PowerShell et Python), l'analyse et la visualisation
 .NOTES
-    Version: 1.2
+    Version: 1.3
     Auteur: Expert en automatisation historique
     Date: 04/04/2025
 #>
 
-# Ajoutez ceci au début du script (après $global:PythonExe)
-$env:PYTHONHOME = $null
-$env:PYTHONPATH = $null
-
 # Configuration initiale
 $global:ProjectRoot = $PSScriptRoot
 $global:LogFile = "$ProjectRoot\project_log_$(Get-Date -Format 'yyyyMMdd').txt"
-# Configuration Python explicite
 $global:PythonExe = "C:\Python312\python.exe"
 $global:PipExe = "C:\Python312\Scripts\pip.exe"
-
-# Vérification de l'installation
-if (-not (Test-Path $global:PythonExe)) {
-    Write-Host "Python n'est pas installé dans C:\Python312\" -ForegroundColor Red
-    # Option : Lancer l'installation automatique ici
-    exit 1
-}
-
-# Ajout au PATH temporaire
-$env:Path = "C:\Python312;C:\Python312\Scripts;" + $env:Path
 $global:FlaskPort = 5000
+
+# Configuration environnement Python
+$env:PYTHONHOME = $null
+$env:PYTHONPATH = $null
+$env:Path = "C:\Python312;C:\Python312\Scripts;" + $env:Path
 
 # Couleurs pour la sortie console
 $global:ColorSuccess = "Green"
@@ -37,6 +27,7 @@ $global:ColorError = "Red"
 $global:ColorWarning = "Yellow"
 $global:ColorInfo = "Cyan"
 
+# Fonction de logging améliorée
 function Write-Log {
     param(
         [string]$Message,
@@ -56,6 +47,67 @@ function Write-Log {
     }
 }
 
+# Vérification de l'installation Python
+if (-not (Test-Path $global:PythonExe)) {
+    Write-Log "Python n'est pas installé dans C:\Python312\" -Level "ERROR"
+    exit 1
+}
+
+# ==============================================
+# FONCTION DE CONVERSION NATIVE POWERSHELL
+# ==============================================
+function Convert-Data {
+    param(
+        [Parameter(Mandatory=$true)][string]$inputFile,
+        [Parameter(Mandatory=$true)][string]$outputFile,
+        [Parameter(Mandatory=$true)][ValidateSet("youtube","web")][string]$dataType
+    )
+
+    try {
+        # Vérifier si le fichier d'entrée existe
+        if (-not (Test-Path -Path $inputFile)) {
+            Write-Log "Le fichier $inputFile n'existe pas." -Level "ERROR"
+            return $false
+        }
+
+        # Mapping des types de données
+        $platformMap = @{
+            "youtube" = "YouTube"
+            "web" = "Web"
+        }
+        $platform = $platformMap[$dataType]
+
+        # Lire le fichier d'entrée
+        $lines = Get-Content -Path $inputFile -Encoding UTF8
+        
+        # Préparer les données pour la conversion JSON
+        $data = @()
+        foreach ($line in $lines) {
+            $trimmedLine = $line.Trim()
+            if (-not [string]::IsNullOrEmpty($trimmedLine)) {
+                $data += @{
+                    platform = $platform
+                    url = $trimmedLine
+                }
+            }
+        }
+
+        # Convertir en JSON et sauvegarder
+        $jsonData = $data | ConvertTo-Json -Depth 3
+        [System.IO.File]::WriteAllText($outputFile, $jsonData, [System.Text.Encoding]::UTF8)
+
+        Write-Log "Conversion réussie : $outputFile" -Level "SUCCESS"
+        return $true
+    }
+    catch {
+        Write-Log "Erreur lors de la conversion : $_" -Level "ERROR"
+        return $false
+    }
+}
+
+# ==============================================
+# FONCTIONS EXISTANTES DU PROJET
+# ==============================================
 function Test-Environment {
     try {
         # Vérification de Python
@@ -90,12 +142,10 @@ function Install-Dependencies {
     try {
         Write-Log "Installation des dépendances Python..."
         
-        # Vérifier si le fichier requirements existe
         if (-not (Test-Path "$ProjectRoot\requirements.txt")) {
             throw "Fichier requirements.txt introuvable"
         }
         
-        # Installation via pip
         $pipOutput = & $PythonExe -m pip install -r "$ProjectRoot\requirements.txt" 2>&1
         
         if ($LASTEXITCODE -ne 0) {
@@ -113,7 +163,8 @@ function Install-Dependencies {
 function Convert-LegacyData {
     param(
         [string]$InputDir = "$ProjectRoot\Donnees_Lien URL",
-        [string]$OutputDir = "$ProjectRoot\data\sources"
+        [string]$OutputDir = "$ProjectRoot\data\sources",
+        [switch]$UseNative = $true
     )
     
     try {
@@ -125,20 +176,35 @@ function Convert-LegacyData {
         
         New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
         
-        # Conversion des fichiers YouTube
-        if (Test-Path "$InputDir\Donnees_Lien_URL_YouTube.txt") {
-            & $PythonExe "$ProjectRoot\scripts\convert_legacy.py" `
-                -i "$InputDir\Donnees_Lien_URL_YouTube.txt" `
-                -o "$OutputDir\youtube.json" `
-                -t "youtube"
+        if ($UseNative) {
+            # Conversion native PowerShell
+            if (Test-Path "$InputDir\Donnees_Lien_URL_YouTube.txt") {
+                Convert-Data -inputFile "$InputDir\Donnees_Lien_URL_YouTube.txt" `
+                            -outputFile "$OutputDir\youtube.json" `
+                            -dataType "youtube"
+            }
+            
+            if (Test-Path "$InputDir\Donnees_Lien_URL_Google.txt") {
+                Convert-Data -inputFile "$InputDir\Donnees_Lien_URL_Google.txt" `
+                            -outputFile "$OutputDir\google.json" `
+                            -dataType "web"
+            }
         }
-        
-        # Conversion des fichiers Google
-        if (Test-Path "$InputDir\Donnees_Lien_URL_Google.txt") {
-            & $PythonExe "$ProjectRoot\scripts\convert_legacy.py" `
-                -i "$InputDir\Donnees_Lien_URL_Google.txt" `
-                -o "$OutputDir\google.json" `
-                -t "web"
+        else {
+            # Conversion via script Python (méthode originale)
+            if (Test-Path "$InputDir\Donnees_Lien_URL_YouTube.txt") {
+                & $PythonExe "$ProjectRoot\scripts\convert_legacy.py" `
+                    -i "$InputDir\Donnees_Lien_URL_YouTube.txt" `
+                    -o "$OutputDir\youtube.json" `
+                    -t "youtube"
+            }
+            
+            if (Test-Path "$InputDir\Donnees_Lien_URL_Google.txt") {
+                & $PythonExe "$ProjectRoot\scripts\convert_legacy.py" `
+                    -i "$InputDir\Donnees_Lien_URL_Google.txt" `
+                    -o "$OutputDir\google.json" `
+                    -t "web"
+            }
         }
         
         Write-Log "Conversion terminée avec succès" -Level "SUCCESS"
@@ -152,10 +218,7 @@ function Invoke-FullAnalysis {
     try {
         Write-Log "Lancement de l'analyse complète..."
         
-        # Analyse principale
         & $PythonExe "$ProjectRoot\scripts\analyze.py" --full
-        
-        # Traitement des cartes
         & $PythonExe "$ProjectRoot\scripts\map_processor.py" --task all
         
         if ($LASTEXITCODE -ne 0) {
@@ -180,22 +243,17 @@ function Start-WebInterface {
         $socket.Close()
         throw "Port $Port déjà utilisé"
         
-        # Démarrer Flask en arrière-plan
         $flaskJob = Start-Job -ScriptBlock {
             param($path, $port)
             Set-Location $path
             & python -m flask run --port $port
         } -ArgumentList $ProjectRoot, $Port
         
-        # Attendre le démarrage
         Start-Sleep -Seconds 5
-        
-        # Ouvrir le navigateur
         Start-Process "http://localhost:$Port"
         
         Write-Log "Interface web démarrée. Ctrl+C pour arrêter." -Level "SUCCESS"
         
-        # Garder le script actif
         while ($true) {
             Start-Sleep -Seconds 1
         }
@@ -237,12 +295,14 @@ function Process-Maps {
     }
 }
 
-# Menu principal
+# ==============================================
+# MENU PRINCIPAL
+# ==============================================
 function Show-MainMenu {
     Clear-Host
     Write-Host @"
 =================================================================
- GESTION PROJET 'REVOIR HISTOIRE ANCIENS BATISSEURS' - v1.2
+ GESTION PROJET 'REVOIR HISTOIRE ANCIENS BATISSEURS' - v1.3
 =================================================================
 
 1. Vérifier l'environnement
@@ -252,6 +312,7 @@ function Show-MainMenu {
 5. Traiter les cartes historiques
 6. Démarrer l'interface web
 7. Tout exécuter (full pipeline)
+8. Options avancées
 Q. Quitter
 
 "@
@@ -261,18 +322,18 @@ Q. Quitter
     switch ($choice) {
         "1" { Test-Environment; Pause; Show-MainMenu }
         "2" { Install-Dependencies; Pause; Show-MainMenu }
-        "3" { Convert-LegacyData; Pause; Show-MainMenu }
+        "3" { 
+            $method = Read-Host "Méthode (native/python) [native]"
+            Convert-LegacyData -UseNative ($method -ne "python")
+            Pause
+            Show-MainMenu
+        }
         "4" { Invoke-FullAnalysis; Pause; Show-MainMenu }
         "5" { 
             $task = Read-Host "Tâche (thumbnails/ocr/verify/all)"
             $lang = if ($task -eq "ocr") { Read-Host "Langue (fra/eng)" } else { "fra" }
             Process-Maps -Task $task -Language $lang
             Pause
-
-            do {
-                $task = Read-Host "Tâche (thumbnails/ocr/verify/all)"
-            } while ($task -notin @("thumbnails", "ocr", "verify", "all"))
-
             Show-MainMenu
         }
         "6" { Start-WebInterface; Show-MainMenu }
@@ -285,8 +346,61 @@ Q. Quitter
                 Start-WebInterface
             }
         }
+        "8" {
+            Show-AdvancedMenu
+        }
         "Q" { exit }
         default { Show-MainMenu }
+    }
+}
+
+function Show-AdvancedMenu {
+    Clear-Host
+    Write-Host @"
+=================================================================
+ OPTIONS AVANCÉES - v1.3
+=================================================================
+
+1. Convertir un fichier spécifique (PowerShell)
+2. Convertir un fichier spécifique (Python)
+3. Tester la conversion native
+4. Retour au menu principal
+Q. Quitter
+
+"@
+
+    $choice = Read-Host "Sélectionnez une option"
+    
+    switch ($choice) {
+        "1" {
+            $inputFile = Read-Host "Fichier d'entrée"
+            $outputFile = Read-Host "Fichier de sortie"
+            $dataType = Read-Host "Type (youtube/web)"
+            Convert-Data -inputFile $inputFile -outputFile $outputFile -dataType $dataType
+            Pause
+            Show-AdvancedMenu
+        }
+        "2" {
+            $inputFile = Read-Host "Fichier d'entrée"
+            $outputFile = Read-Host "Fichier de sortie"
+            $dataType = Read-Host "Type (youtube/web)"
+            & $PythonExe "$ProjectRoot\scripts\convert_legacy.py" -i $inputFile -o $outputFile -t $dataType
+            Pause
+            Show-AdvancedMenu
+        }
+        "3" {
+            # Test de conversion native
+            $testFile = "$ProjectRoot\tests\test_links.txt"
+            if (-not (Test-Path $testFile)) {
+                @("https://youtube.com/video1", "https://youtube.com/video2") | Out-File $testFile
+            }
+            Convert-Data -inputFile $testFile -outputFile "$ProjectRoot\tests\test_output.json" -dataType "youtube"
+            Pause
+            Show-AdvancedMenu
+        }
+        "4" { Show-MainMenu }
+        "Q" { exit }
+        default { Show-AdvancedMenu }
     }
 }
 
@@ -295,7 +409,14 @@ if ($args.Count -gt 0) {
     # Mode ligne de commande
     switch ($args[0]) {
         "--install" { Install-Dependencies -Force }
-        "--convert" { Convert-LegacyData }
+        "--convert" { 
+            if ($args.Count -ge 4) {
+                Convert-Data -inputFile $args[1] -outputFile $args[2] -dataType $args[3]
+            }
+            else {
+                Convert-LegacyData
+            }
+        }
         "--analyze" { Invoke-FullAnalysis }
         "--maps" { 
             $task = if ($args.Count -gt 1) { $args[1] } else { "all" }
@@ -313,7 +434,7 @@ if ($args.Count -gt 0) {
             }
         }
         default {
-            Write-Host "Usage: manage_project.ps1 [--install|--convert|--analyze|--maps [task]|--web|--all]"
+            Write-Host "Usage: manage_project.ps1 [--install|--convert [input output type]|--analyze|--maps [task]|--web|--all]"
             exit 1
         }
     }

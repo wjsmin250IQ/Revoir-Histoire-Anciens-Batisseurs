@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Tableau de bord</h1>
+        <p class="lead">Vue d'ensemble du projet</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <button class="btn btn-primary" onclick="startAnalysis('full')">
+            Lancer l'analyse complète
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Statistiques</h5>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6>Sources</h6>
+                        <p id="source-count">0</p>
+                    </div>
+                    <div>
+                        <h6>Cartes</h6>
+                        <p id="map-count">0</p>
+                    </div>
+                    <div>
+                        <h6>Analyses</h6>
+                        <p id="analysis-count">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Activité récente</h5>
+                <div class="timeline" id="recent-activity">
+                    <!-- Timeline items will be added dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Progression de l'analyse</h5>
+                <div class="progress mb-3">
+                    <div id="analysis-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <p id="analysis-status">En attente de démarrage...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

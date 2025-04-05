@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Fichiers {{ category }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1>Fichiers {{ category }}</h1>
+    <p class="text-muted">{{ files|length }} fichiers trouvés</p>
+</div>
+
+<div class="row">
+    {% for file in files %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <img src="{{ url_for('static', filename='icons/' ~ file.Type ~ '.png') }}" 
+                         onerror="this.src='{{ url_for('static', filename='icons/file.png') }}'" 
+                         class="file-icon">
+                    {{ file.Name }}
+                </h5>
+                <p class="card-text">
+                    <small class="text-muted">{{ file.Type|upper }} • {{ file.Size }} • {{ file.Modified }}</small>
+                </p>
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="/view/{{ file.Path }}" class="btn btn-sm btn-outline-primary">Voir</a>
+                <a href="/download/{{ file.Path }}" class="btn btn-sm btn-outline-secondary">Télécharger</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

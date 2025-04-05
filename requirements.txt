@@ -1,0 +1,6 @@
+flask==3.1.0
+pandas==2.2.3
+pillow==11.1.0
+pytesseract==0.3.13
+pyyaml==6.0.2
+flask-cors==5.0.1

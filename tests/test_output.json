@@ -1,0 +1,10 @@
+﻿[
+  {
+    "url": "https://youtube.com/watch?v=test1",
+    "platform": "YouTube"
+  },
+  {
+    "url": "https://youtube.com/watch?v=test2",
+    "platform": "YouTube"
+  }
+]

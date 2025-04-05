@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Visualisation - {{ filename }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ filename }}</h1>
+    <div class="text-center mt-4">
+        <img src="/{{ image_path }}" alt="{{ filename }}" class="img-fluid img-preview">
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Tous les fichiers{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1>Tous les fichiers du projet</h1>
+    <p class="text-muted">{{ files|length }} fichiers trouvés</p>
+</div>
+
+<!-- Section spéciale pour les liens importants -->
+<div class="card mb-4 border-primary">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-link-45deg"></i> Liens Principaux</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for file in files if file.Category == "Links" and ("Google" in file.Name or "YouTube" in file.Name) %}
+            <div class="col-md-6 mb-3">
+                <div class="card h-100 link-item">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            {% if "Google" in file.Name %}
+                            <i class="bi bi-google text-danger"></i>
+                            {% elif "YouTube" in file.Name %}
+                            <i class="bi bi-youtube text-danger"></i>
+                            {% endif %}
+                            {{ file.Name }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <span class="badge bg-info">{{ file.Type|upper }}</span>
+                                <span class="badge bg-secondary">{{ file.Size }}</span>
+                                <span>Dernière modification: {{ file.Modified }}</span>
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <a href="/view/{{ file.Path }}" class="btn btn-sm btn-primary me-2">
+                            <i class="bi bi-eye"></i> Voir le contenu
+                        </a>
+                        <a href="/download/{{ file.Path }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download"></i> Télécharger
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Tableau pour tous les fichiers -->
+<div class="card">
+    <div class="card-header">
+        <h4 class="mb-0"><i class="bi bi-files"></i> Tous les fichiers du projet</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nom</th>
+                        <th>Catégorie</th>
+                        <th>Type</th>
+                        <th>Taille</th>
+                        <th>Modifié</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                    <tr>
+                        <td>
+                            <img src="{{ url_for('static', filename='icons/' ~ file.Type ~ '.png') }}" 
+                                 onerror="this.src='{{ url_for('static', filename='icons/file.png') }}'" 
+                                 class="file-icon">
+                            {{ file.Name }}
+                        </td>
+                        <td><span class="badge bg-secondary category-badge">{{ file.Category }}</span></td>
+                        <td><span class="badge bg-info text-dark">{{ file.Type }}</span></td>
+                        <td>{{ file.Size }}</td>
+                        <td>{{ file.Modified }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="/view/{{ file.Path }}" class="btn btn-outline-primary" title="Voir">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="/download/{{ file.Path }}" class="btn btn-outline-secondary" title="Télécharger">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

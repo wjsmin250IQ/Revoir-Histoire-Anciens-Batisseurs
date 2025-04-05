@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Cartes historiques{% endblock %}
+
+{% block extra_css %}
+<style>
+    .map-card {
+        transition: transform 0.3s;
+        cursor: pointer;
+    }
+    .map-card:hover {
+        transform: scale(1.03);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Cartes historiques</h1>
+        <p class="lead">Collection de cartes anciennes analysées</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <button class="btn btn-primary" onclick="startAnalysis('maps')">
+            Analyser les cartes
+        </button>
+    </div>
+</div>
+
+<div class="row" id="maps-list">
+    {% for map in maps %}
+    <div class="col-md-4 mb-4">
+        <div class="card map-card" onclick="showFullMap('{{ map.id }}')">
+            <img src="/static/images/maps/{{ map.thumbnail }}" class="card-img-top" alt="{{ map.name }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ map.name }}</h5>
+                <p class="card-text">{{ map.description }}</p>
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">{{ map.year }}</small>
+                    <span class="badge bg-{{ 'success' if map.processed else 'warning' }}">
+                        {{ 'Traité' if map.processed else 'En attente' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
